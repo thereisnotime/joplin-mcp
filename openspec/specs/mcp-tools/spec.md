@@ -36,11 +36,16 @@ The server SHALL expose tools to list, get, create, update, and delete folders (
 - **THEN** the server returns all notes whose `parent_id` matches that folder
 
 ### Requirement: Tag tools
-The server SHALL expose tools to list, get, create, and delete tags, attach and detach tags from notes, and list all notes with a given tag.
+The server SHALL expose tools to list, get, create, rename, and delete tags, attach and detach tags from notes, and list all notes with a given tag.
 
 #### Scenario: tagging a note
 - **WHEN** an MCP client calls `tag_note` with a note ID and a tag ID
 - **THEN** the server attaches the tag to the note via Joplin's API
+
+#### Scenario: renaming a tag preserves attachments
+- **WHEN** an MCP client calls `update_tag` with a tag ID and a new title
+- **THEN** the tag is renamed and existing tag-to-note attachments remain
+  intact
 
 ### Requirement: Search tool
 The server SHALL expose a single `search` tool that accepts Joplin's full search query syntax and returns a paginated list of matching items.
@@ -50,12 +55,17 @@ The server SHALL expose a single `search` tool that accepts Joplin's full search
 - **THEN** the server forwards the query to `/search` and returns matching notes
 
 ### Requirement: Resource tools
-The server SHALL expose tools to list resources, fetch a resource's metadata, download its binary content, upload a new resource, and delete a resource.
+The server SHALL expose tools to list resources, fetch a resource's metadata, download its binary content, upload a new resource, rename a resource (title/filename), list notes that reference a resource, and delete a resource.
 
 #### Scenario: downloading a resource
 - **WHEN** an MCP client calls `download_resource` with a resource ID for a
   decrypted resource
 - **THEN** the server returns the resource's bytes together with its MIME type
+
+#### Scenario: finding notes that use a resource
+- **WHEN** an MCP client calls `list_notes_using_resource` with a resource ID
+- **THEN** the server returns the notes whose body references that resource
+  via Joplin's `:/resource_id` markdown syntax
 
 ### Requirement: Resource size cap
 `download_resource` and `upload_resource` SHALL refuse payloads whose size exceeds the configured `MaxResourceBytes` cap (default 10 MiB), returning an explicit error rather than silently transferring or truncating.

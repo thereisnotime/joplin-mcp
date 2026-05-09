@@ -184,7 +184,7 @@ Open Cline's MCP settings (Command Palette → "Cline: MCP Servers") and add:
 
 ## Tools
 
-28 tools across seven groups.
+31 tools across seven groups.
 
 ### Notes
 
@@ -215,6 +215,7 @@ Open Cline's MCP settings (Command Palette → "Cline: MCP Servers") and add:
 | `list_tags` | List tags, paginated. |
 | `get_tag` | Get a single tag by ID. |
 | `create_tag` | Create a tag. |
+| `update_tag` | Rename a tag in place. Existing attachments are preserved. |
 | `delete_tag` | Delete a tag. |
 | `tag_note` | Attach a tag to a note. |
 | `untag_note` | Detach a tag from a note. |
@@ -234,6 +235,8 @@ Open Cline's MCP settings (Command Palette → "Cline: MCP Servers") and add:
 | `get_resource_metadata` | Get metadata for a single resource (no bytes). |
 | `download_resource` | Download a resource's bytes (base64-encoded). Refuses when the resource is still encrypted on the local device. |
 | `upload_resource` | Upload a new resource. Provide bytes as base64. |
+| `update_resource` | Rename a resource (title / filename). Bytes are immutable; replace via delete + upload. |
+| `list_notes_using_resource` | List notes that reference a given resource. Useful for "where is this attachment used?". |
 | `delete_resource` | Delete a resource. |
 
 ### Change events

@@ -112,6 +112,27 @@ func (c *Client) UploadResource(ctx context.Context, data []byte, filename, titl
 	return r, nil
 }
 
+func (c *Client) UpdateResource(ctx context.Context, id string, in UpdateResourceInput) (Resource, error) {
+	var r Resource
+	if err := c.do(ctx, http.MethodPut, "/resources/"+url.PathEscape(id), nil, in, &r); err != nil {
+		return Resource{}, err
+	}
+	return r, nil
+}
+
+// ListResourceNotes returns the notes that reference the given resource.
+// The reverse direction of /notes/:id/resources.
+func (c *Client) ListResourceNotes(ctx context.Context, resourceID string, opts ListOptions) (Page[Note], error) {
+	if len(opts.Fields) == 0 {
+		opts.Fields = defaultNoteFields
+	}
+	var p Page[Note]
+	if err := c.do(ctx, http.MethodGet, "/resources/"+url.PathEscape(resourceID)+"/notes", listQuery(opts), nil, &p); err != nil {
+		return Page[Note]{}, err
+	}
+	return p, nil
+}
+
 // DeleteResource removes a resource.
 func (c *Client) DeleteResource(ctx context.Context, id string) error {
 	return c.do(ctx, http.MethodDelete, "/resources/"+url.PathEscape(id), nil, nil, nil)

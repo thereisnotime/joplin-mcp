@@ -48,12 +48,18 @@ func TestEndpoints_RouteAndDecode(t *testing.T) {
 			w.WriteHeader(http.StatusNoContent)
 		case strings.HasPrefix(path, "/tags/") && r.Method == http.MethodGet:
 			_, _ = io.WriteString(w, `{"id":"t1","title":"T"}`)
+		case strings.HasPrefix(path, "/tags/") && r.Method == http.MethodPut:
+			_, _ = io.WriteString(w, `{"id":"t1","title":"renamed"}`)
 		case strings.HasPrefix(path, "/tags/") && r.Method == http.MethodDelete:
 			w.WriteHeader(http.StatusNoContent)
 		case path == "/resources" && r.Method == http.MethodGet:
 			_, _ = io.WriteString(w, `{"items":[{"id":"r1","title":"R"}],"has_more":false}`)
+		case strings.HasPrefix(path, "/resources/") && strings.HasSuffix(path, "/notes"):
+			_, _ = io.WriteString(w, `{"items":[{"id":"n1","title":"N","encryption_applied":false}],"has_more":false}`)
 		case strings.HasPrefix(path, "/resources/") && r.Method == http.MethodGet:
 			_, _ = io.WriteString(w, `{"id":"r1","title":"R","mime":"image/png"}`)
+		case strings.HasPrefix(path, "/resources/") && r.Method == http.MethodPut:
+			_, _ = io.WriteString(w, `{"id":"r1","title":"renamed","mime":"image/png"}`)
 		case strings.HasPrefix(path, "/resources/") && r.Method == http.MethodDelete:
 			w.WriteHeader(http.StatusNoContent)
 		case path == "/search":
@@ -99,6 +105,17 @@ func TestEndpoints_RouteAndDecode(t *testing.T) {
 	}
 	if _, err := c.CreateTag(ctx, CreateTagInput{Title: "new"}); err != nil {
 		t.Errorf("CreateTag: %v", err)
+	}
+	tagRename := "renamed"
+	if _, err := c.UpdateTag(ctx, "t1", UpdateTagInput{Title: &tagRename}); err != nil {
+		t.Errorf("UpdateTag: %v", err)
+	}
+	resRename := "renamed"
+	if _, err := c.UpdateResource(ctx, "r1", UpdateResourceInput{Title: &resRename}); err != nil {
+		t.Errorf("UpdateResource: %v", err)
+	}
+	if _, err := c.ListResourceNotes(ctx, "r1", ListOptions{}); err != nil {
+		t.Errorf("ListResourceNotes: %v", err)
 	}
 	if err := c.DeleteTag(ctx, "t1"); err != nil {
 		t.Errorf("DeleteTag: %v", err)

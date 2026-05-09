@@ -41,6 +41,14 @@ func (c *Client) CreateTag(ctx context.Context, in CreateTagInput) (Tag, error) 
 	return t, nil
 }
 
+func (c *Client) UpdateTag(ctx context.Context, id string, in UpdateTagInput) (Tag, error) {
+	var t Tag
+	if err := c.do(ctx, http.MethodPut, "/tags/"+url.PathEscape(id), nil, in, &t); err != nil {
+		return Tag{}, err
+	}
+	return t, nil
+}
+
 // DeleteTag deletes a tag.
 func (c *Client) DeleteTag(ctx context.Context, id string) error {
 	return c.do(ctx, http.MethodDelete, "/tags/"+url.PathEscape(id), nil, nil, nil)

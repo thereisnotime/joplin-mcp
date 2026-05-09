@@ -248,6 +248,19 @@ func TestE2E_TagCRUD(t *testing.T) {
 		t.Error("note not present in list_notes_with_tag")
 	}
 
+	// Rename and verify before detaching.
+	renamed := tagTitle + "-renamed"
+	if _, err := c.UpdateTag(ctx, tag.ID, joplin.UpdateTagInput{Title: &renamed}); err != nil {
+		t.Fatalf("update_tag: %v", err)
+	}
+	got, err := c.GetTag(ctx, tag.ID)
+	if err != nil {
+		t.Fatalf("get tag: %v", err)
+	}
+	if got.Title != renamed {
+		t.Errorf("rename did not persist: %q", got.Title)
+	}
+
 	if err := c.UntagNote(ctx, tag.ID, note.ID); err != nil {
 		t.Fatalf("untag_note: %v", err)
 	}
@@ -300,6 +313,28 @@ func TestE2E_ResourceCRUD(t *testing.T) {
 			t.Errorf("byte %d mismatch: got %#x want %#x", i, bytes[i], tinyPNG[i])
 			break
 		}
+	}
+
+	// Rename via update_resource.
+	newTitle := uploadTitle + "-renamed"
+	if _, err := c.UpdateResource(ctx, res.ID, joplin.UpdateResourceInput{Title: &newTitle}); err != nil {
+		t.Fatalf("update_resource: %v", err)
+	}
+	got, err := c.GetResource(ctx, res.ID)
+	if err != nil {
+		t.Fatalf("get after rename: %v", err)
+	}
+	if got.Title != newTitle {
+		t.Errorf("rename did not persist: %q", got.Title)
+	}
+
+	// list_notes_using_resource: empty because no note references it yet.
+	using, err := c.ListResourceNotes(ctx, res.ID, joplin.ListOptions{Limit: 10})
+	if err != nil {
+		t.Fatalf("list_resource_notes: %v", err)
+	}
+	if len(using.Items) != 0 {
+		t.Errorf("expected 0 notes using fresh resource, got %d", len(using.Items))
 	}
 
 	if err := c.DeleteResource(ctx, res.ID); err != nil {

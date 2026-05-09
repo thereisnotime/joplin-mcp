@@ -41,6 +41,18 @@ type DeleteResourceArgs struct {
 	ResourceID string `json:"resource_id"`
 }
 
+type UpdateResourceArgs struct {
+	ResourceID string  `json:"resource_id"`
+	Title      *string `json:"title,omitempty" jsonschema:"new title for the resource"`
+	Filename   *string `json:"filename,omitempty" jsonschema:"new filename including extension"`
+}
+
+type ListResourceNotesArgs struct {
+	ResourceID string `json:"resource_id"`
+	Page       int    `json:"page,omitempty"`
+	Limit      int    `json:"limit,omitempty"`
+}
+
 func registerResourceTools(srv *mcp.Server, c *joplin.Client, maxBytes int64) {
 	mcp.AddTool(srv, &mcp.Tool{
 		Name:        "list_resources",
@@ -113,6 +125,28 @@ func registerResourceTools(srv *mcp.Server, c *joplin.Client, maxBytes int64) {
 			return nil, ResourceOut{}, err
 		}
 		return nil, resourceOut(r), nil
+	})
+
+	mcp.AddTool(srv, &mcp.Tool{
+		Name:        "update_resource",
+		Description: "Update a resource's title or filename. The bytes themselves are immutable — to replace content, delete and re-upload.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, args UpdateResourceArgs) (*mcp.CallToolResult, ResourceOut, error) {
+		r, err := c.UpdateResource(ctx, args.ResourceID, joplin.UpdateResourceInput{Title: args.Title, Filename: args.Filename})
+		if err != nil {
+			return nil, ResourceOut{}, err
+		}
+		return nil, resourceOut(r), nil
+	})
+
+	mcp.AddTool(srv, &mcp.Tool{
+		Name:        "list_notes_using_resource",
+		Description: "List notes that reference the given resource (reverse of get_note_with_context's resources field — useful for 'where is this attachment used?').",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, args ListResourceNotesArgs) (*mcp.CallToolResult, PageOut[NoteOut], error) {
+		p, err := c.ListResourceNotes(ctx, args.ResourceID, joplin.ListOptions{Page: args.Page, Limit: args.Limit})
+		if err != nil {
+			return nil, PageOut[NoteOut]{}, err
+		}
+		return nil, notesPage(p), nil
 	})
 
 	mcp.AddTool(srv, &mcp.Tool{

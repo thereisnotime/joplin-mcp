@@ -25,6 +25,11 @@ type DeleteTagArgs struct {
 	TagID string `json:"tag_id"`
 }
 
+type UpdateTagArgs struct {
+	TagID string `json:"tag_id"`
+	Title string `json:"title" jsonschema:"new tag name"`
+}
+
 type TagNoteArgs struct {
 	TagID  string `json:"tag_id"`
 	NoteID string `json:"note_id"`
@@ -64,6 +69,17 @@ func registerTagTools(srv *mcp.Server, c *joplin.Client) {
 		Description: "Create a tag.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, args CreateTagArgs) (*mcp.CallToolResult, TagOut, error) {
 		t, err := c.CreateTag(ctx, joplin.CreateTagInput{Title: args.Title})
+		if err != nil {
+			return nil, TagOut{}, err
+		}
+		return nil, tagOut(t), nil
+	})
+
+	mcp.AddTool(srv, &mcp.Tool{
+		Name:        "update_tag",
+		Description: "Rename a tag in place. Existing tag-to-note attachments are preserved.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, args UpdateTagArgs) (*mcp.CallToolResult, TagOut, error) {
+		t, err := c.UpdateTag(ctx, args.TagID, joplin.UpdateTagInput{Title: &args.Title})
 		if err != nil {
 			return nil, TagOut{}, err
 		}

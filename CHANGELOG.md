@@ -9,7 +9,41 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.4.0...HEAD
+
+---
+
+## [0.4.0] - 2026-05-10
+
+### Added
+
+Three small tools that close the remaining gaps in Joplin REST API coverage:
+
+- `update_tag` — rename a tag in place via `PUT /tags/:id`. Existing
+  tag-to-note attachments are preserved. Previously the LLM had to
+  delete + recreate + re-attach to rename.
+- `update_resource` — change a resource's title/filename via
+  `PUT /resources/:id`. Bytes themselves remain immutable; replace via
+  delete + upload.
+- `list_notes_using_resource` — `GET /resources/:id/notes`, the reverse
+  direction of `list_note_resources`. Useful for "where is this
+  attachment used?".
+
+Total tool count is now 31 across seven groups. The intentional
+exclusions (`/master_keys`, `/auth`, arbitrary local file imports)
+remain.
+
+### Spec / docs
+
+- `openspec/specs/mcp-tools/spec.md` updated with two new scenarios
+  (renaming a tag preserves attachments; finding notes that use a
+  resource).
+- README tools table reflects the three additions.
+- E2E suite extended: `TestE2E_TagCRUD` now exercises `update_tag`;
+  `TestE2E_ResourceCRUD` now exercises `update_resource` and
+  `list_notes_using_resource`.
+
+[0.4.0]: https://github.com/thereisnotime/joplin-mcp/releases/tag/v0.4.0
 
 ---
 

@@ -192,6 +192,19 @@ type CreateTagInput struct {
 	Title string `json:"title"`
 }
 
+// UpdateTagInput is the writable subset for updating a tag (currently just
+// rename — Joplin tags carry no other user-editable metadata).
+type UpdateTagInput struct {
+	Title *string `json:"title,omitempty"`
+}
+
+// UpdateResourceInput is the writable subset for updating a resource's
+// metadata. The bytes themselves are immutable; replace via delete + upload.
+type UpdateResourceInput struct {
+	Title    *string `json:"title,omitempty"`
+	Filename *string `json:"filename,omitempty"`
+}
+
 // ListOptions controls pagination, sorting, and field selection on list endpoints.
 type ListOptions struct {
 	Page     int      // 1-based; 0 means default (1)
