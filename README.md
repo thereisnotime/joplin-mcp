@@ -17,10 +17,6 @@ Built in Go on the official [Model Context Protocol Go SDK](https://github.com/m
 Single static binary. Honest about end-to-end encryption: items still encrypted on
 the local Joplin device are surfaced as such, never silently returned as empty bodies.
 
-> **Status:** v0.1 in active development. The first tagged release will land once
-> the Joplin REST client (`internal/joplin`) and MCP tool surface (`internal/tools`)
-> are complete. See [openspec/changes/joplin-mcp-v1/](openspec/changes/joplin-mcp-v1/)
-> for the spec and implementation plan.
 
 ## How it works
 
@@ -98,8 +94,70 @@ different `JOPLIN_BASE_URL` port.
 
 ## Tools
 
-Documented in [openspec/changes/joplin-mcp-v1/specs/mcp-tools/spec.md](openspec/changes/joplin-mcp-v1/specs/mcp-tools/spec.md).
-A full table will appear here once v0.1 ships.
+28 tools across seven groups.
+
+### Notes
+
+| Tool | Description |
+|---|---|
+| `list_notes` | List notes, paginated. Returns `encryption_applied` per item and an `encrypted_items_skipped` count. |
+| `get_note` | Get a single note by ID. `encryption_applied` indicates whether the body could be returned. |
+| `get_note_with_context` | Get a note plus its tags and attached resources, fetched in parallel — saves the LLM 2 round trips. |
+| `create_note` | Create a note. |
+| `update_note` | Partially update a note. Only fields that are set are sent to Joplin. |
+| `delete_note` | Move to trash, or set `permanent=true` to bypass trash. |
+
+### Folders
+
+| Tool | Description |
+|---|---|
+| `list_folders` | List notebooks (folders), paginated. |
+| `get_folder` | Get a single folder by ID. |
+| `create_folder` | Create a folder. Set `parent_id` for nested folders. |
+| `update_folder` | Partially update a folder. |
+| `delete_folder` | Move to trash, or set `permanent=true` to bypass trash. |
+| `list_notes_in_folder` | List notes whose `parent_id` is the given folder. |
+
+### Tags
+
+| Tool | Description |
+|---|---|
+| `list_tags` | List tags, paginated. |
+| `get_tag` | Get a single tag by ID. |
+| `create_tag` | Create a tag. |
+| `delete_tag` | Delete a tag. |
+| `tag_note` | Attach a tag to a note. |
+| `untag_note` | Detach a tag from a note. |
+| `list_notes_with_tag` | List notes that have the given tag. |
+
+### Search
+
+| Tool | Description |
+|---|---|
+| `search` | Full-text search using Joplin's query syntax (e.g. `tag:work notebook:Inbox created:day-7 body:foo`). Paginated. |
+
+### Resources (attachments)
+
+| Tool | Description |
+|---|---|
+| `list_resources` | List resources, paginated. |
+| `get_resource_metadata` | Get metadata for a single resource (no bytes). |
+| `download_resource` | Download a resource's bytes (base64-encoded). Refuses when the resource is still encrypted on the local device. |
+| `upload_resource` | Upload a new resource. Provide bytes as base64. |
+| `delete_resource` | Delete a resource. |
+
+### Change events
+
+| Tool | Description |
+|---|---|
+| `list_changes_since` | List Joplin change events with an ID greater than the supplied cursor. The response carries a new cursor for the next call. |
+
+### Revisions
+
+| Tool | Description |
+|---|---|
+| `list_note_revisions` | List the revision history for a specific note. |
+| `get_revision` | Get a single revision by ID. |
 
 ## Encryption
 
