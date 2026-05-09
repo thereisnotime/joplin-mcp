@@ -1,8 +1,9 @@
 // Command joplin-mcp is a Model Context Protocol server for Joplin notes.
 //
-// It wraps Joplin Desktop's local Web Clipper REST API and exposes notes,
-// folders, tags, search, resources, events, and revisions as MCP tools over
-// stdio.
+// Two modes:
+//   - default (no subcommand) — runs as an MCP server on stdio
+//   - tools / call <tool> [--json '{...}'] — one-shot CLI dispatch through the
+//     same tool handlers, useful for scripting and ad-hoc inspection
 package main
 
 import (
@@ -46,19 +47,28 @@ func printHelp() {
 	fmt.Println(`joplin-mcp — Model Context Protocol server for Joplin
 
 Usage:
-  joplin-mcp           Run the MCP server on stdio
-  joplin-mcp --version Print version and exit
-  joplin-mcp --help    Print this help and exit
+  joplin-mcp                          Run as an MCP server on stdio (default)
+  joplin-mcp tools                    List every tool the server exposes
+  joplin-mcp call <tool> [--json X]   One-shot CLI: invoke a tool and print
+                                      its structured response as JSON
+  joplin-mcp --version                Print version and exit
+  joplin-mcp --help                   Print this help and exit
 
 Environment:
   JOPLIN_TOKEN                (required) Joplin Web Clipper API token
   JOPLIN_BASE_URL             (default http://localhost:41184) Web Clipper base URL
-  JOPLIN_TIMEOUT              (default 10s) per-request HTTP timeout (Go duration syntax)
+  JOPLIN_TIMEOUT              (default 10s) per-request HTTP timeout (Go duration)
   JOPLIN_LOG_LEVEL            (default info) debug | info | warn | error
   JOPLIN_MAX_RESOURCE_BYTES   (default 10485760) max bytes for download/upload_resource
 
-The server speaks Model Context Protocol over stdio. Wire it up to an MCP
-client (e.g. Claude Desktop) per its documentation.`)
+Examples:
+  joplin-mcp tools
+  joplin-mcp call list_folders
+  joplin-mcp call list_notes --json '{"limit":5}'
+  joplin-mcp call search --json '{"query":"tag:work","limit":10}'
+
+The default mode speaks Model Context Protocol over stdio. Wire it up to an
+MCP client (e.g. Claude Desktop) per its documentation.`)
 }
 
 func run() error {
@@ -77,7 +87,25 @@ func run() error {
 			return fmt.Errorf("invalid JOPLIN_LOG_LEVEL %q", v)
 		}
 	}
-	// stdout is reserved for the MCP transport; logs MUST go to stderr.
+
+	// Detect CLI mode (tools / call) up front so we can stay quiet — no
+	// "starting" log line polluting CLI output.
+	var subcommand string
+	var subargs []string
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "tools", "call":
+			subcommand = os.Args[1]
+			subargs = os.Args[2:]
+			// CLI mode: only log warnings/errors unless user opted into debug.
+			if logLevel < slog.LevelWarn {
+				logLevel = slog.LevelWarn
+			}
+		}
+	}
+
+	// stdout is reserved for the MCP transport in server mode and for the
+	// command's own JSON output in CLI mode; logs always go to stderr.
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: logLevel}))
 	slog.SetDefault(logger)
 
@@ -115,6 +143,13 @@ func run() error {
 		maxResource = n
 	}
 
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
+	if subcommand != "" {
+		return runCLI(ctx, client, maxResource, subcommand, subargs)
+	}
+
 	srv := tools.New(client, tools.Options{Version: version.Version, MaxResourceBytes: maxResource})
 
 	logger.Info("starting joplin-mcp",
@@ -123,13 +158,7 @@ func run() error {
 		"timeout", timeout,
 		"max_resource_bytes", maxResource)
 
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer cancel()
-
-	if err := srv.Run(ctx, &mcp.StdioTransport{}); err != nil {
-		return err
-	}
-	return nil
+	return srv.Run(ctx, &mcp.StdioTransport{})
 }
 
 func coalesce(a, b string) string {

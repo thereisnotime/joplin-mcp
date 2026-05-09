@@ -249,6 +249,29 @@ Open Cline's MCP settings (Command Palette → "Cline: MCP Servers") and add:
 | `list_note_revisions` | List the revision history for a specific note. |
 | `get_revision` | Get a single revision by ID. |
 
+## CLI mode
+
+The same binary doubles as a one-shot CLI for scripting and ad-hoc inspection.
+The CLI runs the same tool handlers in-process via the SDK's in-memory
+transport — same code path as the stdio server, no drift.
+
+```sh
+# List every tool the server exposes.
+joplin-mcp tools
+
+# Invoke a tool with no arguments.
+joplin-mcp call list_folders
+
+# Pass arguments as JSON.
+joplin-mcp call list_notes --json '{"limit":5}'
+joplin-mcp call search    --json '{"query":"tag:work","limit":10}'
+joplin-mcp call get_note  --json '{"note_id":"abc..."}'
+```
+
+Output is structured JSON on stdout (so you can pipe into `jq`); errors and
+logs go to stderr. CLI mode auto-suppresses INFO logs unless you set
+`JOPLIN_LOG_LEVEL=debug`. The same env vars (`JOPLIN_TOKEN` etc.) apply.
+
 ## Encryption
 
 joplin-mcp does **not** decrypt anything — Joplin Desktop owns decryption. Items

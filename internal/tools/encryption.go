@@ -9,14 +9,14 @@ func noteOut(n joplin.Note) NoteOut {
 		ID:                n.ID,
 		ParentID:          n.ParentID,
 		Title:             n.Title,
-		IsTodo:            n.IsTodo,
+		IsTodo:            bool(n.IsTodo),
 		TodoDue:           n.TodoDue,
 		TodoCompleted:     n.TodoCompleted,
 		CreatedTime:       n.CreatedTime,
 		UpdatedTime:       n.UpdatedTime,
-		EncryptionApplied: n.EncryptionApplied,
+		EncryptionApplied: bool(n.EncryptionApplied),
 		MasterKeyID:       n.MasterKeyID,
-		IsShared:          n.IsShared,
+		IsShared:          bool(n.IsShared),
 		MarkupLanguage:    n.MarkupLanguage,
 	}
 	if !n.EncryptionApplied {
@@ -32,9 +32,9 @@ func folderOut(f joplin.Folder) FolderOut {
 		Title:             f.Title,
 		CreatedTime:       f.CreatedTime,
 		UpdatedTime:       f.UpdatedTime,
-		EncryptionApplied: f.EncryptionApplied,
+		EncryptionApplied: bool(f.EncryptionApplied),
 		MasterKeyID:       f.MasterKeyID,
-		IsShared:          f.IsShared,
+		IsShared:          bool(f.IsShared),
 		Icon:              f.Icon,
 	}
 }
@@ -44,8 +44,8 @@ func tagOut(t joplin.Tag) TagOut {
 		ID:                t.ID,
 		ParentID:          t.ParentID,
 		Title:             t.Title,
-		EncryptionApplied: t.EncryptionApplied,
-		IsShared:          t.IsShared,
+		EncryptionApplied: bool(t.EncryptionApplied),
+		IsShared:          bool(t.IsShared),
 	}
 }
 
@@ -59,10 +59,10 @@ func resourceOut(r joplin.Resource) ResourceOut {
 		Size:                    r.Size,
 		CreatedTime:             r.CreatedTime,
 		UpdatedTime:             r.UpdatedTime,
-		EncryptionApplied:       r.EncryptionApplied,
-		EncryptionBlobEncrypted: r.EncryptionBlobEncrypted,
+		EncryptionApplied:       bool(r.EncryptionApplied),
+		EncryptionBlobEncrypted: bool(r.EncryptionBlobEncrypted),
 		MasterKeyID:             r.MasterKeyID,
-		IsShared:                r.IsShared,
+		IsShared:                bool(r.IsShared),
 	}
 }
 
@@ -76,7 +76,7 @@ func revisionOut(r joplin.Revision) RevisionOut {
 		MetadataDiff:      r.MetadataDiff,
 		CreatedTime:       r.CreatedTime,
 		UpdatedTime:       r.UpdatedTime,
-		EncryptionApplied: r.EncryptionApplied,
+		EncryptionApplied: bool(r.EncryptionApplied),
 	}
 }
 
@@ -103,17 +103,17 @@ func pageOf[Src any, Dst any](p joplin.Page[Src], conv func(Src) Dst, isEncrypte
 }
 
 func notesPage(p joplin.Page[joplin.Note]) PageOut[NoteOut] {
-	return pageOf(p, noteOut, func(n joplin.Note) bool { return n.EncryptionApplied })
+	return pageOf(p, noteOut, func(n joplin.Note) bool { return bool(n.EncryptionApplied) })
 }
 
 func foldersPage(p joplin.Page[joplin.Folder]) PageOut[FolderOut] {
-	return pageOf(p, folderOut, func(f joplin.Folder) bool { return f.EncryptionApplied })
+	return pageOf(p, folderOut, func(f joplin.Folder) bool { return bool(f.EncryptionApplied) })
 }
 
 func tagsPage(p joplin.Page[joplin.Tag]) PageOut[TagOut] {
-	return pageOf(p, tagOut, func(t joplin.Tag) bool { return t.EncryptionApplied })
+	return pageOf(p, tagOut, func(t joplin.Tag) bool { return bool(t.EncryptionApplied) })
 }
 
 func resourcesPage(p joplin.Page[joplin.Resource]) PageOut[ResourceOut] {
-	return pageOf(p, resourceOut, func(r joplin.Resource) bool { return r.EncryptionApplied })
+	return pageOf(p, resourceOut, func(r joplin.Resource) bool { return bool(r.EncryptionApplied) })
 }

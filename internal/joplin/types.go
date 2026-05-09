@@ -17,120 +17,120 @@ type Page[T any] struct {
 //
 // Reference: https://joplinapp.org/help/api/references/rest_api/#notes
 type Note struct {
-	ID                   string `json:"id"`
-	ParentID             string `json:"parent_id,omitempty"`
-	Title                string `json:"title"`
-	Body                 string `json:"body,omitempty"`
-	CreatedTime          int64  `json:"created_time,omitempty"`
-	UpdatedTime          int64  `json:"updated_time,omitempty"`
-	IsConflict           bool   `json:"is_conflict,omitempty"`
-	Latitude             string `json:"latitude,omitempty"`
-	Longitude            string `json:"longitude,omitempty"`
-	Altitude             string `json:"altitude,omitempty"`
-	Author               string `json:"author,omitempty"`
-	SourceURL            string `json:"source_url,omitempty"`
-	IsTodo               bool   `json:"is_todo,omitempty"`
-	TodoDue              int64  `json:"todo_due,omitempty"`
-	TodoCompleted        int64  `json:"todo_completed,omitempty"`
-	Source               string `json:"source,omitempty"`
-	SourceApplication    string `json:"source_application,omitempty"`
-	ApplicationData      string `json:"application_data,omitempty"`
-	Order                int64  `json:"order,omitempty"`
-	UserCreatedTime      int64  `json:"user_created_time,omitempty"`
-	UserUpdatedTime      int64  `json:"user_updated_time,omitempty"`
-	EncryptionCipherText string `json:"encryption_cipher_text,omitempty"`
-	EncryptionApplied    bool   `json:"encryption_applied"`
-	MarkupLanguage       int    `json:"markup_language,omitempty"`
-	IsShared             bool   `json:"is_shared,omitempty"`
-	ShareID              string `json:"share_id,omitempty"`
-	ConflictOriginalID   string `json:"conflict_original_id,omitempty"`
-	MasterKeyID          string `json:"master_key_id,omitempty"`
-	UserData             string `json:"user_data,omitempty"`
-	Deleted              bool   `json:"deleted,omitempty"`
-	DeletedTime          int64  `json:"deleted_time,omitempty"`
-	BodyHTML             string `json:"body_html,omitempty"`
-	BaseURL              string `json:"base_url,omitempty"`
-	ImageDataURL         string `json:"image_data_url,omitempty"`
-	CropRect             string `json:"crop_rect,omitempty"`
+	ID                   string  `json:"id"`
+	ParentID             string  `json:"parent_id,omitempty"`
+	Title                string  `json:"title"`
+	Body                 string  `json:"body,omitempty"`
+	CreatedTime          int64   `json:"created_time,omitempty"`
+	UpdatedTime          int64   `json:"updated_time,omitempty"`
+	IsConflict           Boolish `json:"is_conflict,omitempty"`
+	Latitude             string  `json:"latitude,omitempty"`
+	Longitude            string  `json:"longitude,omitempty"`
+	Altitude             string  `json:"altitude,omitempty"`
+	Author               string  `json:"author,omitempty"`
+	SourceURL            string  `json:"source_url,omitempty"`
+	IsTodo               Boolish `json:"is_todo,omitempty"`
+	TodoDue              int64   `json:"todo_due,omitempty"`
+	TodoCompleted        int64   `json:"todo_completed,omitempty"`
+	Source               string  `json:"source,omitempty"`
+	SourceApplication    string  `json:"source_application,omitempty"`
+	ApplicationData      string  `json:"application_data,omitempty"`
+	Order                int64   `json:"order,omitempty"`
+	UserCreatedTime      int64   `json:"user_created_time,omitempty"`
+	UserUpdatedTime      int64   `json:"user_updated_time,omitempty"`
+	EncryptionCipherText string  `json:"encryption_cipher_text,omitempty"`
+	EncryptionApplied    Boolish `json:"encryption_applied"`
+	MarkupLanguage       int     `json:"markup_language,omitempty"`
+	IsShared             Boolish `json:"is_shared,omitempty"`
+	ShareID              string  `json:"share_id,omitempty"`
+	ConflictOriginalID   string  `json:"conflict_original_id,omitempty"`
+	MasterKeyID          string  `json:"master_key_id,omitempty"`
+	UserData             string  `json:"user_data,omitempty"`
+	Deleted              Boolish `json:"deleted,omitempty"`
+	DeletedTime          int64   `json:"deleted_time,omitempty"`
+	BodyHTML             string  `json:"body_html,omitempty"`
+	BaseURL              string  `json:"base_url,omitempty"`
+	ImageDataURL         string  `json:"image_data_url,omitempty"`
+	CropRect             string  `json:"crop_rect,omitempty"`
 }
 
 // Folder is a Joplin notebook.
 //
 // Reference: https://joplinapp.org/help/api/references/rest_api/#folders
 type Folder struct {
-	ID                   string `json:"id"`
-	ParentID             string `json:"parent_id,omitempty"`
-	Title                string `json:"title"`
-	CreatedTime          int64  `json:"created_time,omitempty"`
-	UpdatedTime          int64  `json:"updated_time,omitempty"`
-	UserCreatedTime      int64  `json:"user_created_time,omitempty"`
-	UserUpdatedTime      int64  `json:"user_updated_time,omitempty"`
-	EncryptionCipherText string `json:"encryption_cipher_text,omitempty"`
-	EncryptionApplied    bool   `json:"encryption_applied"`
-	IsShared             bool   `json:"is_shared,omitempty"`
-	ShareID              string `json:"share_id,omitempty"`
-	MasterKeyID          string `json:"master_key_id,omitempty"`
-	Icon                 string `json:"icon,omitempty"`
-	UserData             string `json:"user_data,omitempty"`
-	Deleted              bool   `json:"deleted,omitempty"`
-	DeletedTime          int64  `json:"deleted_time,omitempty"`
+	ID                   string  `json:"id"`
+	ParentID             string  `json:"parent_id,omitempty"`
+	Title                string  `json:"title"`
+	CreatedTime          int64   `json:"created_time,omitempty"`
+	UpdatedTime          int64   `json:"updated_time,omitempty"`
+	UserCreatedTime      int64   `json:"user_created_time,omitempty"`
+	UserUpdatedTime      int64   `json:"user_updated_time,omitempty"`
+	EncryptionCipherText string  `json:"encryption_cipher_text,omitempty"`
+	EncryptionApplied    Boolish `json:"encryption_applied"`
+	IsShared             Boolish `json:"is_shared,omitempty"`
+	ShareID              string  `json:"share_id,omitempty"`
+	MasterKeyID          string  `json:"master_key_id,omitempty"`
+	Icon                 string  `json:"icon,omitempty"`
+	UserData             string  `json:"user_data,omitempty"`
+	Deleted              Boolish `json:"deleted,omitempty"`
+	DeletedTime          int64   `json:"deleted_time,omitempty"`
 }
 
 // Tag is a Joplin tag.
 //
 // Reference: https://joplinapp.org/help/api/references/rest_api/#tags
 type Tag struct {
-	ID                   string `json:"id"`
-	ParentID             string `json:"parent_id,omitempty"`
-	Title                string `json:"title"`
-	CreatedTime          int64  `json:"created_time,omitempty"`
-	UpdatedTime          int64  `json:"updated_time,omitempty"`
-	UserCreatedTime      int64  `json:"user_created_time,omitempty"`
-	UserUpdatedTime      int64  `json:"user_updated_time,omitempty"`
-	EncryptionCipherText string `json:"encryption_cipher_text,omitempty"`
-	EncryptionApplied    bool   `json:"encryption_applied"`
-	IsShared             bool   `json:"is_shared,omitempty"`
+	ID                   string  `json:"id"`
+	ParentID             string  `json:"parent_id,omitempty"`
+	Title                string  `json:"title"`
+	CreatedTime          int64   `json:"created_time,omitempty"`
+	UpdatedTime          int64   `json:"updated_time,omitempty"`
+	UserCreatedTime      int64   `json:"user_created_time,omitempty"`
+	UserUpdatedTime      int64   `json:"user_updated_time,omitempty"`
+	EncryptionCipherText string  `json:"encryption_cipher_text,omitempty"`
+	EncryptionApplied    Boolish `json:"encryption_applied"`
+	IsShared             Boolish `json:"is_shared,omitempty"`
 }
 
 // Resource is a Joplin attachment (image, file, etc.).
 //
 // Reference: https://joplinapp.org/help/api/references/rest_api/#resources
 type Resource struct {
-	ID                      string `json:"id"`
-	Title                   string `json:"title,omitempty"`
-	Mime                    string `json:"mime,omitempty"`
-	Filename                string `json:"filename,omitempty"`
-	CreatedTime             int64  `json:"created_time,omitempty"`
-	UpdatedTime             int64  `json:"updated_time,omitempty"`
-	UserCreatedTime         int64  `json:"user_created_time,omitempty"`
-	UserUpdatedTime         int64  `json:"user_updated_time,omitempty"`
-	FileExtension           string `json:"file_extension,omitempty"`
-	EncryptionCipherText    string `json:"encryption_cipher_text,omitempty"`
-	EncryptionApplied       bool   `json:"encryption_applied"`
-	EncryptionBlobEncrypted bool   `json:"encryption_blob_encrypted,omitempty"`
-	Size                    int64  `json:"size,omitempty"`
-	IsShared                bool   `json:"is_shared,omitempty"`
-	ShareID                 string `json:"share_id,omitempty"`
-	MasterKeyID             string `json:"master_key_id,omitempty"`
-	UserData                string `json:"user_data,omitempty"`
+	ID                      string  `json:"id"`
+	Title                   string  `json:"title,omitempty"`
+	Mime                    string  `json:"mime,omitempty"`
+	Filename                string  `json:"filename,omitempty"`
+	CreatedTime             int64   `json:"created_time,omitempty"`
+	UpdatedTime             int64   `json:"updated_time,omitempty"`
+	UserCreatedTime         int64   `json:"user_created_time,omitempty"`
+	UserUpdatedTime         int64   `json:"user_updated_time,omitempty"`
+	FileExtension           string  `json:"file_extension,omitempty"`
+	EncryptionCipherText    string  `json:"encryption_cipher_text,omitempty"`
+	EncryptionApplied       Boolish `json:"encryption_applied"`
+	EncryptionBlobEncrypted Boolish `json:"encryption_blob_encrypted,omitempty"`
+	Size                    int64   `json:"size,omitempty"`
+	IsShared                Boolish `json:"is_shared,omitempty"`
+	ShareID                 string  `json:"share_id,omitempty"`
+	MasterKeyID             string  `json:"master_key_id,omitempty"`
+	UserData                string  `json:"user_data,omitempty"`
 }
 
 // Revision is a Joplin note revision.
 //
 // Reference: https://joplinapp.org/help/api/references/rest_api/#revisions
 type Revision struct {
-	ID                   string `json:"id"`
-	ParentID             string `json:"parent_id,omitempty"`
-	ItemType             int    `json:"item_type,omitempty"`
-	ItemID               string `json:"item_id,omitempty"`
-	ItemUpdatedTime      int64  `json:"item_updated_time,omitempty"`
-	TitleDiff            string `json:"title_diff,omitempty"`
-	BodyDiff             string `json:"body_diff,omitempty"`
-	MetadataDiff         string `json:"metadata_diff,omitempty"`
-	EncryptionCipherText string `json:"encryption_cipher_text,omitempty"`
-	EncryptionApplied    bool   `json:"encryption_applied"`
-	UpdatedTime          int64  `json:"updated_time,omitempty"`
-	CreatedTime          int64  `json:"created_time,omitempty"`
+	ID                   string  `json:"id"`
+	ParentID             string  `json:"parent_id,omitempty"`
+	ItemType             int     `json:"item_type,omitempty"`
+	ItemID               string  `json:"item_id,omitempty"`
+	ItemUpdatedTime      int64   `json:"item_updated_time,omitempty"`
+	TitleDiff            string  `json:"title_diff,omitempty"`
+	BodyDiff             string  `json:"body_diff,omitempty"`
+	MetadataDiff         string  `json:"metadata_diff,omitempty"`
+	EncryptionCipherText string  `json:"encryption_cipher_text,omitempty"`
+	EncryptionApplied    Boolish `json:"encryption_applied"`
+	UpdatedTime          int64   `json:"updated_time,omitempty"`
+	CreatedTime          int64   `json:"created_time,omitempty"`
 }
 
 // Event is a Joplin change event.

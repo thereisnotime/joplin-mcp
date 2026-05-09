@@ -9,6 +9,55 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- One-shot CLI mode on the same binary: `joplin-mcp tools` lists every
+  registered tool; `joplin-mcp call <tool> [--json '{...}']` invokes any
+  tool through the same in-process tool handlers used by the stdio server
+  and prints the structured response as JSON. CLI mode auto-suppresses
+  INFO logs unless `JOPLIN_LOG_LEVEL=debug` is set.
+- `JOPLIN_MAX_RESOURCE_BYTES` env var (default 10 MiB) capping
+  `download_resource` and `upload_resource` payload size; refusal returns
+  an explicit error instead of OOM-ing the client.
+- README configuration snippets for Cursor, Continue, and Cline.
+- Pre-commit hook (`.githooks/pre-commit`) that runs `gofmt` and
+  `go vet` on staged `.go` files. Enable with
+  `git config core.hooksPath .githooks`.
+- Commit-msg hook (`.githooks/commit-msg`) that enforces Conventional
+  Commits locally. Pure bash, zero deps.
+- Commitlint CI workflow (`.github/workflows/commitlint.yaml`) that runs
+  on every PR and blocks merge on malformed commit subjects.
+- OpenSpec base specs in `openspec/specs/` for `joplin-rest-client`,
+  `mcp-tools`, and `encryption-transparency` so future changes can
+  diff against a stated baseline.
+- README "upgrade" note explaining that `go install ...@latest` re-fetches
+  the latest tag.
+
+### Changed
+
+- Branch protection enabled on `main`: required status checks
+  (Build & Test, SAST, SCA), no force-pushes, no deletions, linear
+  history required, conversation resolution required.
+- `joplin.Client` now decodes both JSON booleans and SQLite-style integer
+  booleans (0/1) for every documented bool field via a new `Boolish`
+  helper type. Joplin's REST API returns integer booleans for fields like
+  `is_todo`, `encryption_applied`, `is_shared` — the prior bool typing
+  failed to deserialise any non-empty list.
+- Justfile rewritten with grouped recipes (build/test/lint/security/
+  modules/release/meta), ANSI-coloured output, and a `just check`
+  pre-push pipeline.
+- CLAUDE.md now spells out Conventional Commits as a hard requirement
+  with examples and lists both enforcement points; adds a manual SemVer
+  bump rule.
+- CONTRIBUTING.md mentions both git hooks and removes a false claim that
+  a `JOPLIN_E2E=1` test exists (now noted as roadmap).
+
+### Fixed
+
+- `release.yaml`: pin syft's `install.sh` to the v1.42.3 commit SHA
+  instead of fetching from `main` on every release. Closes the only
+  unpinned external dependency in the release pipeline.
+
 [Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.1.0...HEAD
 
 ---

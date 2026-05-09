@@ -114,12 +114,14 @@ func TestRequest_ContextCancellation(t *testing.T) {
 
 // joplin-rest-client-spec scenario: full type coverage.
 // Verifies that parent_id, encryption_applied, and master_key_id are populated.
+// Joplin returns booleans as integers (SQLite-style), so this exercises both
+// int and bool wire forms via the Boolish type.
 func TestGetNote_PopulatesFullFieldSet(t *testing.T) {
 	c, _ := newTestClient(t, func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, `{
 			"id":"abc","title":"hello","body":"world",
-			"parent_id":"folder1","encryption_applied":true,
-			"master_key_id":"mk1","is_todo":true,"created_time":1700000000000
+			"parent_id":"folder1","encryption_applied":1,
+			"master_key_id":"mk1","is_todo":1,"created_time":1700000000000
 		}`)
 	})
 	n, err := c.GetNote(context.Background(), "abc")
@@ -137,6 +139,29 @@ func TestGetNote_PopulatesFullFieldSet(t *testing.T) {
 	}
 	if !n.IsTodo {
 		t.Error("IsTodo = false, want true")
+	}
+}
+
+func TestBoolish_AcceptsBothWireForms(t *testing.T) {
+	cases := map[string]bool{
+		`,"is_todo":1`:     true,
+		`,"is_todo":0`:     false,
+		`,"is_todo":true`:  true,
+		`,"is_todo":false`: false,
+		``:                 false,
+	}
+	for tail, want := range cases {
+		c, _ := newTestClient(t, func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = io.WriteString(w, `{"id":"x","title":"t"`+tail+`}`)
+		})
+		n, err := c.GetNote(context.Background(), "x")
+		if err != nil {
+			t.Errorf("tail %q: %v", tail, err)
+			continue
+		}
+		if bool(n.IsTodo) != want {
+			t.Errorf("tail %q: IsTodo = %v, want %v", tail, bool(n.IsTodo), want)
+		}
 	}
 }
 
