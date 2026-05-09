@@ -74,13 +74,47 @@ Web Clipper Service, copy the API token shown.
 ### Claude Desktop
 
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or
-`%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+`%APPDATA%\Claude\claude_desktop_config.json` (Windows). If you installed with
+`go install`, the binary lives at `$(go env GOPATH)/bin/joplin-mcp` — typically
+`~/go/bin/joplin-mcp` on Linux/macOS and `%USERPROFILE%\go\bin\joplin-mcp.exe`
+on Windows. Claude Desktop does not expand `~` or `$HOME`, so use the absolute
+path.
 
 ```json
 {
   "mcpServers": {
     "joplin": {
-      "command": "/path/to/joplin-mcp",
+      "command": "/home/YOU/go/bin/joplin-mcp",
+      "env": {
+        "JOPLIN_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
+```
+
+macOS:
+
+```json
+{
+  "mcpServers": {
+    "joplin": {
+      "command": "/Users/YOU/go/bin/joplin-mcp",
+      "env": {
+        "JOPLIN_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
+```
+
+Windows:
+
+```json
+{
+  "mcpServers": {
+    "joplin": {
+      "command": "C:\\Users\\YOU\\go\\bin\\joplin-mcp.exe",
       "env": {
         "JOPLIN_TOKEN": "your-token-here"
       }
