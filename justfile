@@ -2,6 +2,8 @@
 # Run `just` to see all available recipes.
 
 set shell := ["bash", "-uc"]
+set dotenv-load := true        # auto-load .env into every recipe
+set dotenv-required := false   # but don't fail if it's missing
 
 module := "github.com/thereisnotime/joplin-mcp"
 binary := "joplin-mcp"

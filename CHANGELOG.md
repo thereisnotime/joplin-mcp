@@ -11,6 +11,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `.env` support: the binary auto-loads a `.env` file from the current
+  working directory at startup, populating any environment variables not
+  already set by the shell. Stdlib-only loader, no third-party
+  dependency. `.env.example` ships as a template.
+- `just` automatically loads `.env` for every recipe (`set dotenv-load`),
+  so `just e2e` etc. work without an explicit `JOPLIN_TOKEN=…` prefix.
+
 - One-shot CLI mode on the same binary: `joplin-mcp tools` lists every
   registered tool; `joplin-mcp call <tool> [--json '{...}']` invokes any
   tool through the same in-process tool handlers used by the stdio server
@@ -32,6 +39,10 @@ project uses [Semantic Versioning](https://semver.org/).
   diff against a stated baseline.
 - README "upgrade" note explaining that `go install ...@latest` re-fetches
   the latest tag.
+- End-to-end test suite under `e2e/` exercising full CRUD against a real
+  Joplin Desktop. Self-cleaning (everything created uses a
+  `joplin-mcp-e2e-` prefix and is registered with `t.Cleanup`). Run with
+  `just e2e`. Requires `JOPLIN_E2E=1` and `JOPLIN_TOKEN`.
 
 ### Changed
 
@@ -57,6 +68,21 @@ project uses [Semantic Versioning](https://semver.org/).
 - `release.yaml`: pin syft's `install.sh` to the v1.42.3 commit SHA
   instead of fetching from `main` on every release. Closes the only
   unpinned external dependency in the release pipeline.
+- `EventsPage.Cursor` and `ListChangesSinceArgs.Since` are now `string`,
+  not `int64`. Joplin returns the events cursor as a quoted JSON string,
+  which would crash `list_changes_since` with a JSON unmarshal error.
+- Bool fields on Note, Folder, Tag, Resource, Revision now decode from
+  both JSON booleans and SQLite-style integer booleans (0/1) via a new
+  `joplin.Boolish` type. The prior strict-bool typing crashed
+  `list_notes` against any non-empty notebook.
+- `get_note_with_context` now returns `tags: []` and `resources: []`
+  instead of `null` when a note has neither — avoids ambiguity in the
+  LLM's view of "missing" vs "empty".
+- `GetFolder`, `ListFolders`, `GetTag`, `ListTags`, `GetResource`,
+  `ListResources`, `GetRevision`, `ListRevisions` now request explicit
+  `?fields=` selectors. Joplin's defaults strip key fields like
+  `mime`, `size`, and `encryption_applied`, which silently violated the
+  encryption-transparency spec ("every item carries `encryption_applied`").
 
 [Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.1.0...HEAD
 

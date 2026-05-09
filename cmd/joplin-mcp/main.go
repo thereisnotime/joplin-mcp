@@ -37,6 +37,11 @@ func main() {
 		}
 	}
 
+	// Best-effort .env load from cwd. Shell-set env vars always win.
+	if err := loadDotEnv(".env"); err != nil {
+		fmt.Fprintln(os.Stderr, "joplin-mcp: warning: could not read .env:", err)
+	}
+
 	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, "joplin-mcp:", err)
 		os.Exit(1)
