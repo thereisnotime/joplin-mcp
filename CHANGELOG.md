@@ -9,6 +9,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+[Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.3.0...HEAD
+
+---
+
+## [0.3.0] - 2026-05-10
+
 ### Added
 
 - `search` tool now accepts `wait_for_index: true`. When set and the first
@@ -43,7 +49,7 @@ project uses [Semantic Versioning](https://semver.org/).
   feature). Earlier `// #nosec G304` annotation was insufficient on
   newer gosec rule sets.
 
-[Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.2.0...HEAD
+[0.3.0]: https://github.com/thereisnotime/joplin-mcp/releases/tag/v0.3.0
 
 ---
 
