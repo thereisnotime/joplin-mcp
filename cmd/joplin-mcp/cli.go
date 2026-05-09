@@ -64,7 +64,8 @@ func readJSONSource(spec string) (string, error) {
 		return string(b), nil
 	case strings.HasPrefix(spec, "@"):
 		path := spec[1:]
-		b, err := os.ReadFile(path) // #nosec G304 -- path is user-supplied by design
+		// #nosec G304,G703 -- '@path' is the documented way for the user to point us at a JSON file (curl-style)
+		b, err := os.ReadFile(path)
 		if err != nil {
 			return "", fmt.Errorf("read %s: %w", path, err)
 		}
