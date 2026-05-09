@@ -310,13 +310,13 @@ func TestListChangesSince_PassesCursor(t *testing.T) {
 	var cSeen string
 	cs, cleanup := newTestServerPair(t, func(w http.ResponseWriter, r *http.Request) {
 		cSeen = r.URL.Query().Get("cursor")
-		_, _ = io.WriteString(w, `{"items":[{"id":42,"item_id":"n1","type":2}],"cursor":42,"has_more":false}`)
+		_, _ = io.WriteString(w, `{"items":[{"id":42,"item_id":"n1","type":2}],"cursor":"42","has_more":false}`)
 	})
 	defer cleanup()
 
 	res, err := cs.CallTool(context.Background(), &mcp.CallToolParams{
 		Name:      "list_changes_since",
-		Arguments: map[string]any{"since": 10},
+		Arguments: map[string]any{"since": "10"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -325,8 +325,8 @@ func TestListChangesSince_PassesCursor(t *testing.T) {
 	if cSeen != "10" {
 		t.Errorf("upstream cursor = %q", cSeen)
 	}
-	if out.Cursor != 42 {
-		t.Errorf("returned cursor = %d", out.Cursor)
+	if out.Cursor != "42" {
+		t.Errorf("returned cursor = %q", out.Cursor)
 	}
 }
 

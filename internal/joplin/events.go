@@ -4,16 +4,15 @@ import (
 	"context"
 	"net/http"
 	"net/url"
-	"strconv"
 )
 
-// ListEvents returns Joplin change events with an ID greater than the supplied
-// cursor. A cursor of zero returns events from the beginning of the available
-// history.
-func (c *Client) ListEvents(ctx context.Context, cursor int64) (EventsPage, error) {
+// ListEvents returns Joplin change events newer than the supplied cursor. An
+// empty cursor returns events from the beginning of the available history.
+// Cursors are opaque strings; pass back what the previous response returned.
+func (c *Client) ListEvents(ctx context.Context, cursor string) (EventsPage, error) {
 	q := url.Values{}
-	if cursor > 0 {
-		q.Set("cursor", strconv.FormatInt(cursor, 10))
+	if cursor != "" {
+		q.Set("cursor", cursor)
 	}
 	var p EventsPage
 	if err := c.do(ctx, http.MethodGet, "/events", q, nil, &p); err != nil {

@@ -9,7 +9,7 @@ import (
 )
 
 type ListChangesSinceArgs struct {
-	Since int64 `json:"since,omitempty" jsonschema:"cursor returned from a previous call; 0 returns events from the beginning of the available window"`
+	Since string `json:"since,omitempty" jsonschema:"opaque cursor returned from a previous call; empty returns events from the beginning of the available window"`
 }
 
 func registerEventTools(srv *mcp.Server, c *joplin.Client) {

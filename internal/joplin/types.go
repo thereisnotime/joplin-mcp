@@ -146,11 +146,11 @@ type Event struct {
 	BeforeChangeItem string `json:"before_change_item,omitempty"`
 }
 
-// EventsPage is the response shape for /events. The cursor field replaces has_more
-// for the events endpoint.
+// Cursor is a quoted string in Joplin's wire format, so we keep it as opaque
+// text — callers should round-trip it, not do arithmetic.
 type EventsPage struct {
 	Items   []Event `json:"items"`
-	Cursor  int64   `json:"cursor"`
+	Cursor  string  `json:"cursor"`
 	HasMore bool    `json:"has_more"`
 }
 

@@ -286,17 +286,18 @@ func TestListEvents_CursorParam(t *testing.T) {
 	var cursorSeen string
 	c, _ := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		cursorSeen = r.URL.Query().Get("cursor")
-		_, _ = io.WriteString(w, `{"items":[],"cursor":42,"has_more":false}`)
+		// Joplin returns cursor as a quoted string, not a number.
+		_, _ = io.WriteString(w, `{"items":[],"cursor":"42","has_more":false}`)
 	})
-	p, err := c.ListEvents(context.Background(), 10)
+	p, err := c.ListEvents(context.Background(), "10")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if cursorSeen != "10" {
 		t.Errorf("cursor = %q, want 10", cursorSeen)
 	}
-	if p.Cursor != 42 {
-		t.Errorf("response cursor = %d, want 42", p.Cursor)
+	if p.Cursor != "42" {
+		t.Errorf("response cursor = %q, want 42", p.Cursor)
 	}
 }
 

@@ -80,7 +80,7 @@ type PageOut[T any] struct {
 
 type EventsOut struct {
 	Items   []EventOut `json:"items"`
-	Cursor  int64      `json:"cursor" jsonschema:"pass back as 'since' on the next call to resume"`
+	Cursor  string     `json:"cursor" jsonschema:"opaque cursor; pass back as 'since' on the next call to resume"`
 	HasMore bool       `json:"has_more"`
 }
 

@@ -94,6 +94,10 @@ func registerNoteTools(srv *mcp.Server, c *joplin.Client) {
 			return nil, out, resErr
 		}
 		out.Note = noteOut(noteRaw)
+		// Initialise as empty slices so JSON serialises [] not null —
+		// don't make the LLM second-guess whether the field was unset.
+		out.Tags = make([]TagOut, 0, len(tagsRaw.Items))
+		out.Resources = make([]ResourceOut, 0, len(resRaw.Items))
 		for _, t := range tagsRaw.Items {
 			out.Tags = append(out.Tags, tagOut(t))
 		}
