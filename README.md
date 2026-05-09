@@ -262,10 +262,23 @@ joplin-mcp tools
 # Invoke a tool with no arguments.
 joplin-mcp call list_folders
 
-# Pass arguments as JSON.
+# Pass arguments as a JSON literal.
 joplin-mcp call list_notes --json '{"limit":5}'
 joplin-mcp call search    --json '{"query":"tag:work","limit":10}'
 joplin-mcp call get_note  --json '{"note_id":"abc..."}'
+
+# Read JSON from a file (curl-style, '@' prefix).
+joplin-mcp call create_note --json @new-note.json
+
+# Read JSON from stdin — best for multi-line markdown bodies that
+# would otherwise be a nightmare to escape on the shell.
+joplin-mcp call create_note --json - <<'EOF'
+{
+  "parent_id": "abc...",
+  "title": "Today's notes",
+  "body": "## Heading\n\n- item one\n- item two\n\n```go\nfunc main() {}\n```"
+}
+EOF
 ```
 
 Output is structured JSON on stdout (so you can pipe into `jq`); errors and

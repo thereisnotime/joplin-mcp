@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -44,6 +46,56 @@ func runCLI(ctx context.Context, c *joplin.Client, maxResource int64, sub string
 	}
 }
 
+// readJSONSource resolves a --json value into a JSON string:
+//
+//   - "-"        → read from stdin
+//   - "@PATH"    → read from the file at PATH
+//   - anything   → treated as the literal JSON
+//
+// Same convention as curl's --data flag, so users with multi-line markdown
+// bodies don't have to fight shell escaping.
+func readJSONSource(spec string) (string, error) {
+	switch {
+	case spec == "-":
+		b, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return "", fmt.Errorf("read stdin: %w", err)
+		}
+		return string(b), nil
+	case strings.HasPrefix(spec, "@"):
+		path := spec[1:]
+		b, err := os.ReadFile(path) // #nosec G304 -- path is user-supplied by design
+		if err != nil {
+			return "", fmt.Errorf("read %s: %w", path, err)
+		}
+		return string(b), nil
+	default:
+		return spec, nil
+	}
+}
+
+const callHelp = `usage: joplin-mcp call <tool_name> [--json <SOURCE>]
+
+--json accepts:
+  '{...}'        a JSON literal
+  -              read JSON from stdin
+  @path/to/file  read JSON from a file (curl-style)
+
+Examples:
+  joplin-mcp call list_notes --json '{"limit":5}'
+  joplin-mcp call create_note --json @note.json
+  echo '{"note_id":"abc"}' | joplin-mcp call get_note --json -
+
+Heredoc with multi-line markdown body:
+  joplin-mcp call create_note --json - <<'EOF'
+  {
+    "title": "Today's notes",
+    "parent_id": "...",
+    "body": "## Heading\n\n- item one\n- item two"
+  }
+  EOF
+`
+
 func cliListTools(ctx context.Context, cs *mcp.ClientSession) error {
 	res, err := cs.ListTools(ctx, &mcp.ListToolsParams{})
 	if err != nil {
@@ -57,7 +109,7 @@ func cliListTools(ctx context.Context, cs *mcp.ClientSession) error {
 
 func cliCall(ctx context.Context, cs *mcp.ClientSession, args []string) error {
 	if len(args) == 0 {
-		return errors.New("usage: joplin-mcp call <tool_name> [--json '{...}']")
+		return errors.New("usage: joplin-mcp call <tool_name> [--json <SOURCE>]")
 	}
 	tool := args[0]
 
@@ -68,14 +120,17 @@ func cliCall(ctx context.Context, cs *mcp.ClientSession, args []string) error {
 			if i+1 >= len(args) {
 				return errors.New("--json requires a value")
 			}
-			payload = args[i+1]
+			raw, err := readJSONSource(args[i+1])
+			if err != nil {
+				return err
+			}
+			payload = raw
 			i++
 		case "--help", "-h":
-			fmt.Println("usage: joplin-mcp call <tool_name> [--json '{...}']")
-			fmt.Println("example: joplin-mcp call list_notes --json '{\"limit\":5}'")
+			fmt.Print(callHelp)
 			return nil
 		default:
-			return fmt.Errorf("unknown flag %q (try --json '{...}')", args[i])
+			return fmt.Errorf("unknown flag %q (try --json <SOURCE>)", args[i])
 		}
 	}
 

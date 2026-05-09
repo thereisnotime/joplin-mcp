@@ -9,6 +9,15 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `joplin-mcp call ... --json` now accepts three sources, curl-style:
+  - a JSON literal (existing behaviour)
+  - `-` to read from stdin (good for piping)
+  - `@path/to/file.json` to read from a file
+  Removes the multi-line shell-escaping pain when creating notes with
+  markdown bodies — pipe a heredoc or point at a file instead.
+
 [Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.1.1...HEAD
 
 ---
