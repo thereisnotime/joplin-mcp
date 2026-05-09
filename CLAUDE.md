@@ -16,11 +16,19 @@ or features.
 
 - Format with `gofmt` / `goimports` before committing.
 - Keep `cmd/` thin — wiring only, no business logic.
-- All package-level identifiers have doc comments.
 - Error messages are lowercase and do not end with punctuation
   (e.g. `"note not found"`, not `"Note not found."`).
 - No `Co-Authored-By` trailers in commits.
 - Conventional commits: `feat:`, `fix:`, `docs:`, `chore:`, etc. Enforced by commitlint.
+
+## Comments
+
+Default to writing no comments. Add one only when the **why** is non-obvious:
+a decision someone would otherwise question, a workaround for upstream
+behaviour, or an invariant the code does not express. Keep them short and
+natural — one line is usually enough. Don't write docstrings on every
+exported symbol just because Go convention suggests it; well-named
+identifiers carry their own meaning.
 
 ## MCP transport hygiene
 

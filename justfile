@@ -24,11 +24,11 @@ test:
     go test ./... -race -shuffle=on
 
 cover:
-    go test -race -shuffle=on -coverprofile=coverage.out -covermode=atomic ./...
+    go test -race -shuffle=on -coverprofile=coverage.out -covermode=atomic -coverpkg=./internal/... ./...
     go tool cover -func=coverage.out | tail -1
 
 cover-html:
-    go test -race -shuffle=on -coverprofile=coverage.out -covermode=atomic ./...
+    go test -race -shuffle=on -coverprofile=coverage.out -covermode=atomic -coverpkg=./internal/... ./...
     go tool cover -html=coverage.out -o coverage.html
 
 lint:
