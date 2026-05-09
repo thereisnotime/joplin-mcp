@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -79,6 +80,16 @@ func IsNotFound(err error) bool {
 	return false
 }
 
+// wrapNetErr turns the bare connection-refused error into something that
+// tells the user what to actually fix. The original error is preserved as
+// the wrapped cause so errors.Is/As still work.
+func (c *Client) wrapNetErr(err error) error {
+	if errors.Is(err, syscall.ECONNREFUSED) {
+		return fmt.Errorf("cannot reach Joplin at %s — is Joplin Desktop running with the Web Clipper service enabled? (Joplin → Tools → Options → Web Clipper): %w", c.baseURL, err)
+	}
+	return err
+}
+
 // do performs the HTTP request, decoding the JSON response into out (if non-nil)
 // and returning an *APIError for any non-2xx status.
 func (c *Client) do(ctx context.Context, method, path string, query url.Values, body any, out any) error {
@@ -111,7 +122,7 @@ func (c *Client) do(ctx context.Context, method, path string, query url.Values, 
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return err
+		return c.wrapNetErr(err)
 	}
 	defer resp.Body.Close()
 
@@ -144,7 +155,7 @@ func (c *Client) rawGET(ctx context.Context, path string, query url.Values) ([]b
 	}
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return nil, "", err
+		return nil, "", c.wrapNetErr(err)
 	}
 	defer resp.Body.Close()
 

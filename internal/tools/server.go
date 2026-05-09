@@ -6,9 +6,10 @@ import (
 	"github.com/thereisnotime/joplin-mcp/internal/joplin"
 )
 
-// 10 MiB. Larger blobs blow up an LLM's context budget and rarely make sense
-// in a tool response. Override via JOPLIN_MAX_RESOURCE_BYTES.
-const DefaultMaxResourceBytes int64 = 10 * 1024 * 1024
+// 50 MiB. Most LLM clients can handle this much in a single tool response,
+// and real-world Joplin attachments routinely exceed 10 MiB (PDFs, scans).
+// Override via JOPLIN_MAX_RESOURCE_BYTES if your client has a tighter budget.
+const DefaultMaxResourceBytes int64 = 50 * 1024 * 1024
 
 type Options struct {
 	Version          string

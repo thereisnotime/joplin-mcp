@@ -9,6 +9,40 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `search` tool now accepts `wait_for_index: true`. When set and the first
+  query returns no results, the server retries on a 0.5s → 2s back-off (≈7s
+  ceiling) until results show up — Joplin's full-text index lags note
+  writes by a few seconds. The tool description warns the LLM about the
+  lag so it knows when to opt in.
+- `docs/claude-desktop-troubleshooting.md`: first-time-user landing page
+  for "it doesn't work" — covers connection refused, missing token, 401/
+  403, encryption, size cap, and how to verify without an MCP client.
+
+### Changed
+
+- `JOPLIN_MAX_RESOURCE_BYTES` default raised from 10 MiB to **50 MiB**.
+  Real-world Joplin attachments (PDF scans, photos) routinely exceed
+  10 MiB; the lower default surprised users for no real benefit.
+
+### Fixed
+
+- Friendlier error when Joplin Desktop isn't reachable. Connection-refused
+  errors are now wrapped with a one-line hint pointing at the Web Clipper
+  setting:
+  > cannot reach Joplin at http://localhost:41184 — is Joplin Desktop
+  > running with the Web Clipper service enabled?
+- `wagoid/commitlint-github-action` was rejecting Dependabot PRs because
+  Dependabot's commit bodies embed long URLs. Disabled
+  `body-max-line-length` and `footer-max-line-length` in
+  `.commitlintrc.yaml` (the header cap of 100 still applies, where it
+  matters for `git log` readability).
+- `gosec` G703 finding on the `--json @file` source read suppressed —
+  the path is intentionally user-supplied (the documented curl-style
+  feature). Earlier `// #nosec G304` annotation was insufficient on
+  newer gosec rule sets.
+
 [Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.2.0...HEAD
 
 ---

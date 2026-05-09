@@ -70,7 +70,7 @@ joplin-mcp reads its configuration from environment variables.
 | `JOPLIN_BASE_URL` | no | `http://localhost:41184` | Joplin Web Clipper base URL |
 | `JOPLIN_TIMEOUT` | no | `10s` | HTTP request timeout (Go duration syntax) |
 | `JOPLIN_LOG_LEVEL` | no | `info` | `debug`, `info`, `warn`, or `error` |
-| `JOPLIN_MAX_RESOURCE_BYTES` | no | `10485760` (10 MiB) | Cap on `download_resource` and `upload_resource` payload size |
+| `JOPLIN_MAX_RESOURCE_BYTES` | no | `52428800` (50 MiB) | Cap on `download_resource` and `upload_resource` payload size |
 
 To get a token: open Joplin Desktop → **Tools → Options → Web Clipper**, enable the
 Web Clipper Service, copy the API token shown.
