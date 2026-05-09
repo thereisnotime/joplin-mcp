@@ -6,8 +6,15 @@ import (
 	"net/url"
 )
 
-// ListTags returns one page of tags.
+var defaultTagFields = []string{
+	"id", "parent_id", "title", "created_time", "updated_time",
+	"encryption_applied", "is_shared",
+}
+
 func (c *Client) ListTags(ctx context.Context, opts ListOptions) (Page[Tag], error) {
+	if len(opts.Fields) == 0 {
+		opts.Fields = defaultTagFields
+	}
 	var p Page[Tag]
 	if err := c.do(ctx, http.MethodGet, "/tags", listQuery(opts), nil, &p); err != nil {
 		return Page[Tag]{}, err
@@ -15,10 +22,11 @@ func (c *Client) ListTags(ctx context.Context, opts ListOptions) (Page[Tag], err
 	return p, nil
 }
 
-// GetTag returns a single tag by ID.
 func (c *Client) GetTag(ctx context.Context, id string) (Tag, error) {
+	q := url.Values{}
+	q.Set("fields", joinFields(defaultTagFields))
 	var t Tag
-	if err := c.do(ctx, http.MethodGet, "/tags/"+url.PathEscape(id), nil, nil, &t); err != nil {
+	if err := c.do(ctx, http.MethodGet, "/tags/"+url.PathEscape(id), q, nil, &t); err != nil {
 		return Tag{}, err
 	}
 	return t, nil

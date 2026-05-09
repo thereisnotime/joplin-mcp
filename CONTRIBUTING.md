@@ -81,8 +81,14 @@ Tests live next to the code they cover (`*_test.go`). Joplin client tests run ag
 `net/http/httptest.Server` and the MCP tool layer is exercised end to end via the
 SDK's in-memory transport; neither needs a real Joplin Desktop.
 
-A real-Joplin end-to-end test gated behind `JOPLIN_E2E=1` is on the roadmap but not
-yet implemented — for now, smoke testing against a real instance is manual.
+End-to-end tests gated behind `JOPLIN_E2E=1` live in `e2e/`. They exercise full
+CRUD against a real Joplin Desktop instance, create everything they need with a
+`joplin-mcp-e2e-<timestamp>` prefix, and clean up after themselves (even on
+failure). Run with:
+
+```sh
+JOPLIN_TOKEN=... just e2e
+```
 
 Aim to keep overall coverage above 80%. Check with:
 

@@ -6,11 +6,18 @@ import (
 	"net/url"
 )
 
-// ListRevisions returns one page of all revisions across the database.
-//
+var defaultRevisionFields = []string{
+	"id", "parent_id", "item_type", "item_id", "item_updated_time",
+	"title_diff", "body_diff", "metadata_diff",
+	"encryption_applied", "created_time", "updated_time",
+}
+
 // Joplin's /revisions endpoint does not filter by note ID directly; callers
 // that want a single note's history should use ListNoteRevisions.
 func (c *Client) ListRevisions(ctx context.Context, opts ListOptions) (Page[Revision], error) {
+	if len(opts.Fields) == 0 {
+		opts.Fields = defaultRevisionFields
+	}
 	var p Page[Revision]
 	if err := c.do(ctx, http.MethodGet, "/revisions", listQuery(opts), nil, &p); err != nil {
 		return Page[Revision]{}, err
@@ -18,10 +25,11 @@ func (c *Client) ListRevisions(ctx context.Context, opts ListOptions) (Page[Revi
 	return p, nil
 }
 
-// GetRevision returns a single revision by ID.
 func (c *Client) GetRevision(ctx context.Context, id string) (Revision, error) {
+	q := url.Values{}
+	q.Set("fields", joinFields(defaultRevisionFields))
 	var r Revision
-	if err := c.do(ctx, http.MethodGet, "/revisions/"+url.PathEscape(id), nil, nil, &r); err != nil {
+	if err := c.do(ctx, http.MethodGet, "/revisions/"+url.PathEscape(id), q, nil, &r); err != nil {
 		return Revision{}, err
 	}
 	return r, nil

@@ -12,8 +12,16 @@ import (
 	"strings"
 )
 
-// ListResources returns one page of resources.
+var defaultResourceFields = []string{
+	"id", "title", "mime", "filename", "file_extension", "size",
+	"created_time", "updated_time", "encryption_applied",
+	"encryption_blob_encrypted", "master_key_id", "is_shared",
+}
+
 func (c *Client) ListResources(ctx context.Context, opts ListOptions) (Page[Resource], error) {
+	if len(opts.Fields) == 0 {
+		opts.Fields = defaultResourceFields
+	}
 	var p Page[Resource]
 	if err := c.do(ctx, http.MethodGet, "/resources", listQuery(opts), nil, &p); err != nil {
 		return Page[Resource]{}, err
@@ -21,10 +29,11 @@ func (c *Client) ListResources(ctx context.Context, opts ListOptions) (Page[Reso
 	return p, nil
 }
 
-// GetResource returns metadata for a single resource.
 func (c *Client) GetResource(ctx context.Context, id string) (Resource, error) {
+	q := url.Values{}
+	q.Set("fields", joinFields(defaultResourceFields))
 	var r Resource
-	if err := c.do(ctx, http.MethodGet, "/resources/"+url.PathEscape(id), nil, nil, &r); err != nil {
+	if err := c.do(ctx, http.MethodGet, "/resources/"+url.PathEscape(id), q, nil, &r); err != nil {
 		return Resource{}, err
 	}
 	return r, nil

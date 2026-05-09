@@ -6,8 +6,17 @@ import (
 	"net/url"
 )
 
-// ListFolders returns one page of folders.
+// Joplin's default field set on /folders is minimal; ask explicitly for what
+// we need so encryption_applied / master_key_id are always populated.
+var defaultFolderFields = []string{
+	"id", "parent_id", "title", "created_time", "updated_time",
+	"encryption_applied", "master_key_id", "is_shared", "icon",
+}
+
 func (c *Client) ListFolders(ctx context.Context, opts ListOptions) (Page[Folder], error) {
+	if len(opts.Fields) == 0 {
+		opts.Fields = defaultFolderFields
+	}
 	var p Page[Folder]
 	if err := c.do(ctx, http.MethodGet, "/folders", listQuery(opts), nil, &p); err != nil {
 		return Page[Folder]{}, err
@@ -15,10 +24,11 @@ func (c *Client) ListFolders(ctx context.Context, opts ListOptions) (Page[Folder
 	return p, nil
 }
 
-// GetFolder returns a single folder by ID.
 func (c *Client) GetFolder(ctx context.Context, id string) (Folder, error) {
+	q := url.Values{}
+	q.Set("fields", joinFields(defaultFolderFields))
 	var f Folder
-	if err := c.do(ctx, http.MethodGet, "/folders/"+url.PathEscape(id), nil, nil, &f); err != nil {
+	if err := c.do(ctx, http.MethodGet, "/folders/"+url.PathEscape(id), q, nil, &f); err != nil {
 		return Folder{}, err
 	}
 	return f, nil

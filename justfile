@@ -78,6 +78,11 @@ cover-html:
     go tool cover -html=coverage.out -o coverage.html
     @printf "{{green}}✓ wrote coverage.html{{reset}}\n"
 
+# Run end-to-end tests against a real Joplin Desktop. Requires JOPLIN_TOKEN.
+e2e:
+    @printf "{{blue}}> e2e (real Joplin){{reset}}\n"
+    JOPLIN_E2E=1 go test -count=1 -v ./e2e/...
+
 # Run benchmarks (none yet, placeholder).
 bench:
     @printf "{{blue}}> bench{{reset}}\n"
