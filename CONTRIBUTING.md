@@ -24,16 +24,20 @@ Requirements: [Go 1.26+](https://go.dev/dl/), [just](https://just.systems/).
 
 PRs require at least one approving review and all CI checks to pass before merging.
 
-## Pre-commit hook
+## Local hooks
 
-The repo ships a lightweight pre-commit hook that runs `gofmt` and `go vet` on
-staged `.go` files. Enable it once per clone:
+The repo ships two lightweight git hooks under `.githooks/`:
+
+- `pre-commit` — runs `gofmt` and `go vet` on staged `.go` files.
+- `commit-msg` — enforces Conventional Commits on the commit subject.
+
+Enable them once per clone:
 
 ```sh
 git config core.hooksPath .githooks
 ```
 
-The hook is plain bash with no external dependencies. Skip it for a single
+Both hooks are plain bash with no external dependencies. Skip them for a single
 commit with `git commit --no-verify`.
 
 ## Conventional commits

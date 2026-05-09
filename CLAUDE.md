@@ -19,7 +19,45 @@ or features.
 - Error messages are lowercase and do not end with punctuation
   (e.g. `"note not found"`, not `"Note not found."`).
 - No `Co-Authored-By` trailers in commits.
-- Conventional commits: `feat:`, `fix:`, `docs:`, `chore:`, etc. Enforced by commitlint.
+
+## Commits
+
+Commit subjects MUST follow [Conventional Commits](https://www.conventionalcommits.org/).
+
+- **Format:** `type(optional-scope)!?: subject`
+- **Allowed types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
+  `build`, `ci`, `chore`, `revert`
+- **Subject:** lowercase, no trailing punctuation, max 100 characters
+- **Breaking change:** add `!` after the type/scope (e.g. `feat(api)!: drop legacy field`)
+  and explain in the body
+
+Examples:
+
+```
+feat(joplin): add list_changes_since tool
+fix(tools): respect context cancellation in download_resource
+docs: clarify encryption transparency in README
+```
+
+Enforcement points (all active):
+
+- Local: `.githooks/commit-msg` blocks malformed messages on commit.
+  Enable per-clone with `git config core.hooksPath .githooks`.
+- CI: `.github/workflows/commitlint.yaml` runs on every PR via
+  `wagoid/commitlint-github-action` against `.commitlintrc.yaml` —
+  blocks merge if any commit fails.
+
+## Versioning
+
+The project follows [SemVer](https://semver.org/). Tags look like `vMAJOR.MINOR.PATCH`.
+
+- `feat:` commits since the last tag → next release bumps **MINOR**.
+- `fix:` commits → next release bumps **PATCH**.
+- Any `!` breaking change → next release bumps **MAJOR**.
+
+This is a manual, human-driven process — no `release-please` etc. wired up. When
+cutting a release, audit the commits since the last tag and pick the bump that
+honours these rules.
 
 ## Comments
 

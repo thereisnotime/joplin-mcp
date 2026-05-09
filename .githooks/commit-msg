@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# joplin-mcp commit-msg hook — Conventional Commits enforcement.
+# Enable with: git config core.hooksPath .githooks
+# Bypass once with: git commit --no-verify
+
+set -e
+
+C_RED='\033[0;31m'
+C_RESET='\033[0m'
+
+msg_file="$1"
+first_line=$(head -1 "$msg_file")
+
+# Allow git's own merge / revert / fixup commits through.
+case "$first_line" in
+  Merge\ *|Revert\ *|fixup!*|squash!*|amend!*) exit 0 ;;
+esac
+
+[ -z "$first_line" ] && exit 0
+
+# Conventional Commits pattern matching .commitlintrc.yaml type-enum.
+pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([^)]+\))?!?: .+'
+
+if ! [[ "$first_line" =~ $pattern ]]; then
+  printf "${C_RED}commit message does not follow Conventional Commits${C_RESET}\n" >&2
+  printf "  subject: %s\n" "$first_line" >&2
+  printf "  format:  type(optional-scope)!?: subject\n" >&2
+  printf "  types:   feat fix docs style refactor perf test build ci chore revert\n" >&2
+  printf "  example: feat(joplin): add list_changes_since tool\n" >&2
+  printf "  bypass:  git commit --no-verify\n" >&2
+  exit 1
+fi
+
+if [ ${#first_line} -gt 100 ]; then
+  printf "${C_RED}commit subject is %d characters; max is 100${C_RESET}\n" "${#first_line}" >&2
+  exit 1
+fi
