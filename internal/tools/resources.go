@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -11,6 +12,11 @@ import (
 )
 
 var ErrResourceEncrypted = errors.New("resource is encrypted on this device; unlock Joplin and retry")
+
+// errResourceTooLarge wraps the configured cap so the LLM gets a useful error.
+func errResourceTooLarge(actual, cap int64) error {
+	return fmt.Errorf("resource size %d bytes exceeds configured limit %d (set JOPLIN_MAX_RESOURCE_BYTES to raise)", actual, cap)
+}
 
 type ListResourcesArgs struct {
 	Page  int `json:"page,omitempty"`
@@ -35,7 +41,7 @@ type DeleteResourceArgs struct {
 	ResourceID string `json:"resource_id"`
 }
 
-func registerResourceTools(srv *mcp.Server, c *joplin.Client) {
+func registerResourceTools(srv *mcp.Server, c *joplin.Client, maxBytes int64) {
 	mcp.AddTool(srv, &mcp.Tool{
 		Name:        "list_resources",
 		Description: "List resources (attachments), paginated.",
@@ -69,9 +75,16 @@ func registerResourceTools(srv *mcp.Server, c *joplin.Client) {
 		if meta.EncryptionApplied || meta.EncryptionBlobEncrypted {
 			return nil, DownloadResourceOut{}, ErrResourceEncrypted
 		}
+		// Joplin reports size in metadata; bail before downloading bytes we'd reject anyway.
+		if meta.Size > 0 && meta.Size > maxBytes {
+			return nil, DownloadResourceOut{}, errResourceTooLarge(meta.Size, maxBytes)
+		}
 		data, ct, err := c.DownloadResource(ctx, args.ResourceID)
 		if err != nil {
 			return nil, DownloadResourceOut{}, err
+		}
+		if int64(len(data)) > maxBytes {
+			return nil, DownloadResourceOut{}, errResourceTooLarge(int64(len(data)), maxBytes)
 		}
 		return nil, DownloadResourceOut{
 			Base64Data:  base64.StdEncoding.EncodeToString(data),
@@ -84,9 +97,16 @@ func registerResourceTools(srv *mcp.Server, c *joplin.Client) {
 		Name:        "upload_resource",
 		Description: "Upload a new resource. Provide the bytes as base64.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, args UploadResourceArgs) (*mcp.CallToolResult, ResourceOut, error) {
+		// base64.StdEncoding.DecodedLen lets us reject before allocating a huge []byte.
+		if int64(base64.StdEncoding.DecodedLen(len(args.Base64Data))) > maxBytes {
+			return nil, ResourceOut{}, errResourceTooLarge(int64(base64.StdEncoding.DecodedLen(len(args.Base64Data))), maxBytes)
+		}
 		data, err := base64.StdEncoding.DecodeString(args.Base64Data)
 		if err != nil {
 			return nil, ResourceOut{}, err
+		}
+		if int64(len(data)) > maxBytes {
+			return nil, ResourceOut{}, errResourceTooLarge(int64(len(data)), maxBytes)
 		}
 		r, err := c.UploadResource(ctx, data, args.Filename, args.Title)
 		if err != nil {

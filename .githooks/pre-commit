@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# joplin-mcp pre-commit hook.
+# Enable: git config core.hooksPath .githooks
+
+set -e
+
+C_RED='\033[0;31m'
+C_GREEN='\033[0;32m'
+C_YELLOW='\033[0;33m'
+C_RESET='\033[0m'
+
+fail=0
+
+go_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.go$' || true)
+if [ -n "$go_files" ]; then
+  printf "${C_YELLOW}> gofmt${C_RESET}\n"
+  bad=$(echo "$go_files" | xargs gofmt -s -l)
+  if [ -n "$bad" ]; then
+    printf "${C_RED}gofmt issues:${C_RESET}\n%s\n" "$bad"
+    fail=1
+  fi
+
+  printf "${C_YELLOW}> go vet${C_RESET}\n"
+  if ! go vet ./...; then
+    fail=1
+  fi
+fi
+
+if [ $fail -ne 0 ]; then
+  printf "${C_RED}pre-commit checks failed${C_RESET}\n"
+  exit 1
+fi
+
+printf "${C_GREEN}pre-commit ok${C_RESET}\n"

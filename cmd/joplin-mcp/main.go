@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -50,10 +51,11 @@ Usage:
   joplin-mcp --help    Print this help and exit
 
 Environment:
-  JOPLIN_TOKEN       (required) Joplin Web Clipper API token
-  JOPLIN_BASE_URL    (default http://localhost:41184) Web Clipper base URL
-  JOPLIN_TIMEOUT     (default 10s) per-request HTTP timeout (Go duration syntax)
-  JOPLIN_LOG_LEVEL   (default info) debug | info | warn | error
+  JOPLIN_TOKEN                (required) Joplin Web Clipper API token
+  JOPLIN_BASE_URL             (default http://localhost:41184) Web Clipper base URL
+  JOPLIN_TIMEOUT              (default 10s) per-request HTTP timeout (Go duration syntax)
+  JOPLIN_LOG_LEVEL            (default info) debug | info | warn | error
+  JOPLIN_MAX_RESOURCE_BYTES   (default 10485760) max bytes for download/upload_resource
 
 The server speaks Model Context Protocol over stdio. Wire it up to an MCP
 client (e.g. Claude Desktop) per its documentation.`)
@@ -104,12 +106,22 @@ func run() error {
 		return err
 	}
 
-	srv := tools.New(client, version.Version)
+	maxResource := tools.DefaultMaxResourceBytes
+	if v := strings.TrimSpace(os.Getenv("JOPLIN_MAX_RESOURCE_BYTES")); v != "" {
+		n, err := strconv.ParseInt(v, 10, 64)
+		if err != nil || n <= 0 {
+			return fmt.Errorf("invalid JOPLIN_MAX_RESOURCE_BYTES %q: must be a positive integer", v)
+		}
+		maxResource = n
+	}
+
+	srv := tools.New(client, tools.Options{Version: version.Version, MaxResourceBytes: maxResource})
 
 	logger.Info("starting joplin-mcp",
 		"version", version.Version,
 		"base_url", coalesce(baseURL, joplin.DefaultBaseURL),
-		"timeout", timeout)
+		"timeout", timeout,
+		"max_resource_bytes", maxResource)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()

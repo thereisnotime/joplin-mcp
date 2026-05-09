@@ -16,6 +16,10 @@ import (
 )
 
 func newTestServerPair(t *testing.T, h http.HandlerFunc) (*mcp.ClientSession, func()) {
+	return newTestServerPairWithMax(t, 0, h)
+}
+
+func newTestServerPairWithMax(t *testing.T, maxBytes int64, h http.HandlerFunc) (*mcp.ClientSession, func()) {
 	t.Helper()
 	joplinSrv := httptest.NewServer(h)
 	t.Cleanup(joplinSrv.Close)
@@ -25,7 +29,7 @@ func newTestServerPair(t *testing.T, h http.HandlerFunc) (*mcp.ClientSession, fu
 		t.Fatal(err)
 	}
 
-	srv := New(jc, "test")
+	srv := New(jc, Options{Version: "test", MaxResourceBytes: maxBytes})
 	ctx := context.Background()
 
 	clientTransport, serverTransport := mcp.NewInMemoryTransports()
@@ -222,6 +226,49 @@ func TestDownloadResource_RefusesEncrypted(t *testing.T) {
 		if !strings.Contains(tc.Text, "encrypted") {
 			t.Errorf("error text = %q, missing 'encrypted'", tc.Text)
 		}
+	}
+}
+
+func TestDownloadResource_RefusesOversizeFromMetadata(t *testing.T) {
+	cs, cleanup := newTestServerPairWithMax(t, 100, func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/file") {
+			t.Error("file endpoint hit; expected refusal before download")
+			return
+		}
+		_, _ = io.WriteString(w, `{"id":"r1","size":999999,"encryption_applied":false}`)
+	})
+	defer cleanup()
+	res, err := cs.CallTool(context.Background(), &mcp.CallToolParams{
+		Name:      "download_resource",
+		Arguments: map[string]any{"resource_id": "r1"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.IsError {
+		t.Error("expected IsError for oversize resource")
+	}
+	if tc, ok := res.Content[0].(*mcp.TextContent); ok && !strings.Contains(tc.Text, "exceeds") {
+		t.Errorf("error text = %q, missing 'exceeds'", tc.Text)
+	}
+}
+
+func TestUploadResource_RefusesOversize(t *testing.T) {
+	cs, cleanup := newTestServerPairWithMax(t, 4, func(w http.ResponseWriter, _ *http.Request) {
+		t.Fatal("server should not be hit for oversize upload")
+		_ = w
+	})
+	defer cleanup()
+	// "ABCDEFGH" = 8 bytes raw, well above the 4-byte cap.
+	res, err := cs.CallTool(context.Background(), &mcp.CallToolParams{
+		Name:      "upload_resource",
+		Arguments: map[string]any{"filename": "x.bin", "base64_data": base64.StdEncoding.EncodeToString([]byte("ABCDEFGH"))},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.IsError {
+		t.Error("expected IsError for oversize upload")
 	}
 }
 

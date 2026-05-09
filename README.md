@@ -57,6 +57,9 @@ Binaries are available for Linux, macOS, and Windows on amd64 and arm64.
 go install github.com/thereisnotime/joplin-mcp/cmd/joplin-mcp@latest
 ```
 
+To upgrade later, re-run the same command — `@latest` always pulls the most
+recent published tag.
+
 ## Configuration
 
 joplin-mcp reads its configuration from environment variables.
@@ -65,8 +68,9 @@ joplin-mcp reads its configuration from environment variables.
 |---|---|---|---|
 | `JOPLIN_TOKEN` | yes | | Joplin Web Clipper API token |
 | `JOPLIN_BASE_URL` | no | `http://localhost:41184` | Joplin Web Clipper base URL |
-| `JOPLIN_TIMEOUT` | no | `10s` | HTTP request timeout |
+| `JOPLIN_TIMEOUT` | no | `10s` | HTTP request timeout (Go duration syntax) |
 | `JOPLIN_LOG_LEVEL` | no | `info` | `debug`, `info`, `warn`, or `error` |
+| `JOPLIN_MAX_RESOURCE_BYTES` | no | `10485760` (10 MiB) | Cap on `download_resource` and `upload_resource` payload size |
 
 To get a token: open Joplin Desktop → **Tools → Options → Web Clipper**, enable the
 Web Clipper Service, copy the API token shown.
@@ -125,6 +129,58 @@ Windows:
 
 For multiple Joplin profiles, register each as its own MCP server entry with a
 different `JOPLIN_BASE_URL` port.
+
+### Cursor
+
+Add to `~/.cursor/mcp.json` (or your project's `.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "joplin": {
+      "command": "/home/YOU/go/bin/joplin-mcp",
+      "env": { "JOPLIN_TOKEN": "your-token-here" }
+    }
+  }
+}
+```
+
+### Continue
+
+Add to your `~/.continue/config.json` under `experimental.modelContextProtocolServers`:
+
+```json
+{
+  "experimental": {
+    "modelContextProtocolServers": [
+      {
+        "transport": {
+          "type": "stdio",
+          "command": "/home/YOU/go/bin/joplin-mcp",
+          "env": { "JOPLIN_TOKEN": "your-token-here" }
+        }
+      }
+    ]
+  }
+}
+```
+
+### Cline (VS Code extension)
+
+Open Cline's MCP settings (Command Palette → "Cline: MCP Servers") and add:
+
+```json
+{
+  "mcpServers": {
+    "joplin": {
+      "command": "/home/YOU/go/bin/joplin-mcp",
+      "env": { "JOPLIN_TOKEN": "your-token-here" },
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
 
 ## Tools
 

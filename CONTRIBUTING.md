@@ -24,6 +24,18 @@ Requirements: [Go 1.26+](https://go.dev/dl/), [just](https://just.systems/).
 
 PRs require at least one approving review and all CI checks to pass before merging.
 
+## Pre-commit hook
+
+The repo ships a lightweight pre-commit hook that runs `gofmt` and `go vet` on
+staged `.go` files. Enable it once per clone:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+The hook is plain bash with no external dependencies. Skip it for a single
+commit with `git commit --no-verify`.
+
 ## Conventional commits
 
 Commit subjects follow [Conventional Commits](https://www.conventionalcommits.org/) and
@@ -62,8 +74,11 @@ openspec/            Spec-driven development artefacts (proposals, designs, task
 ## Tests
 
 Tests live next to the code they cover (`*_test.go`). Joplin client tests run against
-`net/http/httptest.Server` and do not need a real Joplin Desktop. End-to-end tests
-gated behind `JOPLIN_E2E=1` hit a real Joplin Desktop with a real token.
+`net/http/httptest.Server` and the MCP tool layer is exercised end to end via the
+SDK's in-memory transport; neither needs a real Joplin Desktop.
+
+A real-Joplin end-to-end test gated behind `JOPLIN_E2E=1` is on the roadmap but not
+yet implemented — for now, smoke testing against a real instance is manual.
 
 Aim to keep overall coverage above 80%. Check with:
 
