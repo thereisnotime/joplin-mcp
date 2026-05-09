@@ -26,3 +26,10 @@ rules:
     - 2
     - always
     - 100
+  # Disabled: Dependabot and other automated PRs put long URLs (release
+  # notes, compare links) in commit bodies. The 100-char cap is appropriate
+  # for human-written prose but not for embedded references.
+  body-max-line-length:
+    - 0
+  footer-max-line-length:
+    - 0
