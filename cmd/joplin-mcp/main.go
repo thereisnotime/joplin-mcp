@@ -55,7 +55,9 @@ Usage:
   joplin-mcp                          Run as an MCP server on stdio (default)
   joplin-mcp tools                    List every tool the server exposes
   joplin-mcp call <tool> [--json X]   One-shot CLI: invoke a tool and print
-                                      its structured response as JSON
+                                      its structured response as JSON.
+                                      X may be a JSON literal, '-' (stdin),
+                                      or '@path' (read from file).
   joplin-mcp --version                Print version and exit
   joplin-mcp --help                   Print this help and exit
 
@@ -71,6 +73,8 @@ Examples:
   joplin-mcp call list_folders
   joplin-mcp call list_notes --json '{"limit":5}'
   joplin-mcp call search --json '{"query":"tag:work","limit":10}'
+  joplin-mcp call create_note --json @new-note.json
+  echo '{"note_id":"abc"}' | joplin-mcp call get_note --json -
 
 The default mode speaks Model Context Protocol over stdio. Wire it up to an
 MCP client (e.g. Claude Desktop) per its documentation.`)
