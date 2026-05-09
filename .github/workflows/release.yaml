@@ -31,7 +31,7 @@ jobs:
         # upstream tamper of the script can't slip into our release pipeline.
         run: curl -sSfL https://raw.githubusercontent.com/anchore/syft/860126c650c2d05b63b83a3895e41268162315a3/install.sh | sh -s -- -b /usr/local/bin v1.42.3  # script @v1.42.3
 
-      - uses: goreleaser/goreleaser-action@e24998b8b67b290c2fa8b7c14fcfa7de2c5c9b8c  # v7.1.0
+      - uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8  # v7.2.1
         with:
           version: v2.15.2
           args: release --clean
