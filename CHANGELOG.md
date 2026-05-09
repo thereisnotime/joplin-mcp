@@ -9,6 +9,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+[Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.1.1...HEAD
+
+---
+
+## [0.1.1] - 2026-05-09
+
 ### Added
 
 - `.env` support: the binary auto-loads a `.env` file from the current
@@ -84,7 +90,7 @@ project uses [Semantic Versioning](https://semver.org/).
   `mime`, `size`, and `encryption_applied`, which silently violated the
   encryption-transparency spec ("every item carries `encryption_applied`").
 
-[Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.1.0...HEAD
+[0.1.1]: https://github.com/thereisnotime/joplin-mcp/releases/tag/v0.1.1
 
 ---
 
