@@ -12,7 +12,7 @@ just build   # outputs bin/joplin-mcp
 just test    # run tests with race detector
 ```
 
-Requirements: [Go 1.25+](https://go.dev/dl/), [just](https://just.systems/).
+Requirements: [Go 1.26+](https://go.dev/dl/), [just](https://just.systems/).
 
 ## Making changes
 

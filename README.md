@@ -116,7 +116,7 @@ returns an explicit error if the resource is encrypted.
 
 ## Building from source
 
-Requires [Go 1.25+](https://go.dev/dl/) and [just](https://just.systems/).
+Requires [Go 1.26+](https://go.dev/dl/) and [just](https://just.systems/).
 
 ```sh
 git clone git@github.com:thereisnotime/joplin-mcp.git
