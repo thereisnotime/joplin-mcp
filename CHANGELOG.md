@@ -9,6 +9,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+[Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.2.0...HEAD
+
+---
+
+## [0.2.0] - 2026-05-10
+
 ### Added
 
 - `joplin-mcp call ... --json` now accepts three sources, curl-style:
@@ -18,7 +24,7 @@ project uses [Semantic Versioning](https://semver.org/).
   Removes the multi-line shell-escaping pain when creating notes with
   markdown bodies — pipe a heredoc or point at a file instead.
 
-[Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.1.1...HEAD
+[0.2.0]: https://github.com/thereisnotime/joplin-mcp/releases/tag/v0.2.0
 
 ---
 
