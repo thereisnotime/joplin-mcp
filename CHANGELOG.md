@@ -54,6 +54,16 @@ but not see, restore, or purge trashed items):
   to its original folder.
 - `empty_trash` — permanently deletes every trashed note.
 
+**Folder icons** (sidebar glyphs):
+
+- `set_folder_icon` — convenience tool: takes an emoji and sets it as the
+  folder's sidebar icon. Pass empty string to clear.
+- `create_folder` and `update_folder` gain an optional `emoji` argument so
+  icons can be set inline rather than in a follow-up call.
+- `joplin.EmojiIcon(emoji)` Go helper serialises into Joplin's wire
+  format (`{"emoji":"…","type":1}`). Same path the Joplin desktop app uses.
+- Total tool count: 41 → 42.
+
 ### Internal
 
 - `joplin.ExtractLinkedIDs(body)` — regex helper that returns deduped

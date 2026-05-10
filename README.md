@@ -184,7 +184,7 @@ Open Cline's MCP settings (Command Palette → "Cline: MCP Servers") and add:
 
 ## Tools
 
-41 tools across ten groups.
+42 tools across ten groups.
 
 ### Notes
 
@@ -207,6 +207,7 @@ Open Cline's MCP settings (Command Palette → "Cline: MCP Servers") and add:
 | `update_folder` | Partially update a folder. |
 | `delete_folder` | Move to trash, or set `permanent=true` to bypass trash. |
 | `list_notes_in_folder` | List notes whose `parent_id` is the given folder. |
+| `set_folder_icon` | Set or clear a folder's sidebar icon emoji. (Also settable inline via the `emoji` arg on `create_folder` / `update_folder`.) |
 
 ### Tags
 
