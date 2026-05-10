@@ -51,6 +51,14 @@ remain.
 
 ### Added
 
+- Three new tools closing the last gaps in REST coverage:
+  - `update_tag` — rename a tag in place; existing note attachments
+    survive (previous workaround was delete + create + reattach).
+  - `update_resource` — rename a resource (title / filename); bytes stay
+    immutable, replace via delete + upload.
+  - `list_notes_using_resource` — the reverse of `list_note_resources`;
+    answers "which notes embed this attachment?".
+  Tool count: 28 → 31.
 - `search` tool now accepts `wait_for_index: true`. When set and the first
   query returns no results, the server retries on a 0.5s → 2s back-off (≈7s
   ceiling) until results show up — Joplin's full-text index lags note
@@ -82,6 +90,14 @@ remain.
   the path is intentionally user-supplied (the documented curl-style
   feature). Earlier `// #nosec G304` annotation was insufficient on
   newer gosec rule sets.
+
+### Build
+
+- Dependabot PR merges:
+  - `goreleaser/goreleaser-action` 7.1.0 → 7.2.1 (#1)
+  - `github/codeql-action` 4.35.2 → 4.35.4 (#2)
+  - `aquasecurity/trivy-action` 0.35.0 → 0.36.0 (#3)
+  - `sigstore/cosign-installer` 4.1.1 → 4.1.2 (#4)
 
 [0.3.0]: https://github.com/thereisnotime/joplin-mcp/releases/tag/v0.3.0
 
