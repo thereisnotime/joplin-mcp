@@ -70,6 +70,13 @@ func TestAllRemainingTools_Smoke(t *testing.T) {
 			_, _ = io.WriteString(w, `{"items":[{"id":"rev1","item_id":"n1","encryption_applied":false}],"has_more":false}`)
 		case strings.HasPrefix(path, "/revisions/"):
 			_, _ = io.WriteString(w, `{"id":"rev1","item_id":"n1"}`)
+		// diagnostics
+		case path == "/ping":
+			_, _ = io.WriteString(w, "JoplinClipperServer")
+		case path == "/master_keys":
+			_, _ = io.WriteString(w, `{"items":[{"id":"mk1","encryption_method":4,"enabled":1,"hint":"test hint"}],"has_more":false}`)
+		case strings.HasPrefix(path, "/master_keys/"):
+			_, _ = io.WriteString(w, `{"id":"mk1","encryption_method":4,"enabled":1,"hint":"test hint"}`)
 		default:
 			t.Fatalf("unexpected request: %s %s", r.Method, path)
 		}
@@ -154,6 +161,12 @@ func TestNewTools_Smoke(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		case strings.HasPrefix(path, "/tags/") && strings.Contains(path, "/notes") && r.Method == http.MethodDelete:
 			w.WriteHeader(http.StatusNoContent)
+		case path == "/ping":
+			_, _ = io.WriteString(w, "JoplinClipperServer")
+		case path == "/master_keys":
+			_, _ = io.WriteString(w, `{"items":[{"id":"mk1","encryption_method":4,"enabled":1}],"has_more":false}`)
+		case strings.HasPrefix(path, "/master_keys/"):
+			_, _ = io.WriteString(w, `{"id":"mk1","encryption_method":4,"enabled":1}`)
 		default:
 			t.Fatalf("unexpected request: %s %s", r.Method, path)
 		}
@@ -185,6 +198,9 @@ func TestNewTools_Smoke(t *testing.T) {
 		{"list_trash", nil},
 		{"restore_note_from_trash", map[string]any{"note_id": "n1"}},
 		{"empty_trash", nil},
+		{"health", nil},
+		{"list_master_keys", nil},
+		{"get_master_key", map[string]any{"master_key_id": "mk1"}},
 	}
 	for _, c := range calls {
 		res, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: c.name, Arguments: c.args})

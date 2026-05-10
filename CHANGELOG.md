@@ -9,6 +9,37 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **`health` tool** — quick connectivity check that pings Joplin, reports the
+  base URL we're talking to, the joplin-mcp version, and the master-key
+  count. Useful as a first call when the LLM hits an error and needs to
+  diagnose whether the problem is reachability, auth, or something else.
+- **`list_master_keys` / `get_master_key` tools** — read-only metadata
+  about Joplin's encryption master keys (id, hint, encryption method,
+  enabled). joplin-mcp never decrypts; this is purely diagnostic so the
+  LLM can answer "what's my encryption setup?" without touching anything
+  sensitive.
+- **`--env-file <path>` flag** plus an XDG fallback chain. The binary now
+  loads its `.env` from, in priority order:
+  1. `--env-file <path>` (must exist if specified)
+  2. `./.env` in the current working directory
+  3. `$XDG_CONFIG_HOME/joplin-mcp/.env` (or `~/.config/joplin-mcp/.env`)
+  Lets you keep the token out of `mcp.json` entirely.
+- **`describe [<tool>]` CLI subcommand** — dumps the full `tools/list`
+  response (the same JSON schemas the MCP client serialises into the
+  LLM's system prompt). Useful for verifying that tool descriptions and
+  argument schemas read well to a model.
+- **Internal: `joplin.Ping`, `joplin.MasterKey`, `joplin.ListMasterKeys`,
+  `joplin.GetMasterKey`** — wrap the corresponding REST endpoints.
+
+### Changed
+
+- Empty-input tools (`health`, `list_master_keys`, `empty_trash`) now
+  use a named `NoArgs` struct instead of an anonymous `struct{}`. The
+  Go MCP SDK can't synthesise a JSON Schema for an unnamed empty struct
+  and panics on registration.
+
 [Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.5.0...HEAD
 
 ---

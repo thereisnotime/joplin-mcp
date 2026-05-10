@@ -14,6 +14,9 @@ const DefaultMaxResourceBytes int64 = 50 * 1024 * 1024
 type Options struct {
 	Version          string
 	MaxResourceBytes int64
+	// BaseURL is the Joplin endpoint we're talking to. Surfaced via the
+	// `health` tool so the LLM can echo it back when diagnosing.
+	BaseURL string
 }
 
 func New(c *joplin.Client, opts Options) *mcp.Server {
@@ -32,5 +35,6 @@ func New(c *joplin.Client, opts Options) *mcp.Server {
 	registerLinkTools(srv, c)
 	registerBulkTools(srv, c)
 	registerTrashTools(srv, c)
+	registerDiagnosticTools(srv, c, opts.BaseURL, opts.Version)
 	return srv
 }

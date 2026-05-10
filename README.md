@@ -184,7 +184,7 @@ Open Cline's MCP settings (Command Palette → "Cline: MCP Servers") and add:
 
 ## Tools
 
-42 tools across ten groups.
+45 tools across eleven groups.
 
 ### Notes
 
@@ -282,6 +282,14 @@ Open Cline's MCP settings (Command Palette → "Cline: MCP Servers") and add:
 | `list_trash` | List notes currently in the trash (`deleted_time` is set). |
 | `restore_note_from_trash` | Move a trashed note back to its folder by clearing `deleted_time`. |
 | `empty_trash` | Permanently delete every note currently in the trash. Irreversible. |
+
+### Diagnostics
+
+| Tool | Description |
+|---|---|
+| `health` | Ping Joplin, report base URL, joplin-mcp version, and master-key count. Good first call when troubleshooting. |
+| `list_master_keys` | Read-only metadata for the profile's encryption master keys (id, hint, encryption method, enabled). No private material exposed. |
+| `get_master_key` | Same metadata for one key by ID. |
 
 ## CLI mode
 

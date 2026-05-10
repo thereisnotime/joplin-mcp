@@ -26,6 +26,15 @@ import (
 )
 
 func main() {
+	// Pull --env-file <path> off the front of args before any other parsing,
+	// so dispatch (--version, tools, call) sees a clean argv.
+	envFile, rest, err := extractEnvFileFlag(os.Args[1:])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "joplin-mcp:", err)
+		os.Exit(1)
+	}
+	os.Args = append([]string{os.Args[0]}, rest...)
+
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
 		case "--version", "-v", "version":
@@ -37,9 +46,9 @@ func main() {
 		}
 	}
 
-	// Best-effort .env load from cwd. Shell-set env vars always win.
-	if err := loadDotEnv(".env"); err != nil {
-		fmt.Fprintln(os.Stderr, "joplin-mcp: warning: could not read .env:", err)
+	if err := loadEnvWithFallbacks(envFile); err != nil {
+		fmt.Fprintln(os.Stderr, "joplin-mcp:", err)
+		os.Exit(1)
 	}
 
 	if err := run(); err != nil {
@@ -48,16 +57,86 @@ func main() {
 	}
 }
 
+// extractEnvFileFlag pulls --env-file <path> (or --env-file=<path>) out of
+// the supplied args list and returns (path, remaining-args, err). Empty
+// path means the flag wasn't given.
+func extractEnvFileFlag(args []string) (string, []string, error) {
+	out := make([]string, 0, len(args))
+	envFile := ""
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		switch {
+		case a == "--env-file":
+			if i+1 >= len(args) {
+				return "", nil, fmt.Errorf("--env-file requires a path")
+			}
+			envFile = args[i+1]
+			i++
+		case strings.HasPrefix(a, "--env-file="):
+			envFile = strings.TrimPrefix(a, "--env-file=")
+		default:
+			out = append(out, a)
+		}
+	}
+	return envFile, out, nil
+}
+
+// loadEnvWithFallbacks loads the first .env it finds, in priority order:
+//
+//  1. explicit --env-file path (must exist if specified)
+//  2. ./.env in the current working directory
+//  3. $XDG_CONFIG_HOME/joplin-mcp/.env (or ~/.config/joplin-mcp/.env)
+//
+// Shell-set env vars always win over file values regardless of source.
+func loadEnvWithFallbacks(explicit string) error {
+	if explicit != "" {
+		if _, err := os.Stat(explicit); err != nil {
+			return fmt.Errorf("--env-file %q: %w", explicit, err)
+		}
+		if err := loadDotEnv(explicit); err != nil {
+			return fmt.Errorf("--env-file %q: %w", explicit, err)
+		}
+		return nil
+	}
+	// Fallback chain: silently skip any path that's missing; only warn if
+	// a file we found is unreadable for some other reason.
+	for _, path := range defaultEnvPaths() {
+		if _, err := os.Stat(path); err == nil {
+			if err := loadDotEnv(path); err != nil {
+				fmt.Fprintln(os.Stderr, "joplin-mcp: warning: could not read", path+":", err)
+			}
+			return nil
+		}
+	}
+	return nil
+}
+
+func defaultEnvPaths() []string {
+	paths := []string{".env"}
+	if dir := os.Getenv("XDG_CONFIG_HOME"); dir != "" {
+		paths = append(paths, dir+"/joplin-mcp/.env")
+	}
+	if home, err := os.UserHomeDir(); err == nil {
+		paths = append(paths, home+"/.config/joplin-mcp/.env")
+	}
+	return paths
+}
+
 func printHelp() {
 	fmt.Println(`joplin-mcp — Model Context Protocol server for Joplin
 
 Usage:
   joplin-mcp                          Run as an MCP server on stdio (default)
   joplin-mcp tools                    List every tool the server exposes
+  joplin-mcp describe [<tool>]        Dump full JSON schemas (input + output)
+                                      that the LLM sees. Omit <tool> for all.
   joplin-mcp call <tool> [--json X]   One-shot CLI: invoke a tool and print
                                       its structured response as JSON.
                                       X may be a JSON literal, '-' (stdin),
                                       or '@path' (read from file).
+  joplin-mcp --env-file <path>        Load env vars from this file before
+                                      running. Combine with any subcommand.
+                                      Shell-set env vars always win.
   joplin-mcp --version                Print version and exit
   joplin-mcp --help                   Print this help and exit
 
@@ -103,7 +182,7 @@ func run() error {
 	var subargs []string
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
-		case "tools", "call":
+		case "tools", "call", "describe":
 			subcommand = os.Args[1]
 			subargs = os.Args[2:]
 			// CLI mode: only log warnings/errors unless user opted into debug.
@@ -159,7 +238,11 @@ func run() error {
 		return runCLI(ctx, client, maxResource, subcommand, subargs)
 	}
 
-	srv := tools.New(client, tools.Options{Version: version.Version, MaxResourceBytes: maxResource})
+	srv := tools.New(client, tools.Options{
+		Version:          version.Version,
+		MaxResourceBytes: maxResource,
+		BaseURL:          coalesce(baseURL, joplin.DefaultBaseURL),
+	})
 
 	logger.Info("starting joplin-mcp",
 		"version", version.Version,

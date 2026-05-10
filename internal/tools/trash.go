@@ -48,7 +48,7 @@ func registerTrashTools(srv *mcp.Server, c *joplin.Client) {
 	mcp.AddTool(srv, &mcp.Tool{
 		Name:        "empty_trash",
 		Description: "Permanently delete every note currently in the trash. Irreversible. Returns the number purged and any IDs that could not be deleted.",
-	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ struct{}) (*mcp.CallToolResult, EmptyTrashOut, error) {
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ NoArgs) (*mcp.CallToolResult, EmptyTrashOut, error) {
 		// Walk every page; trash can be larger than one page.
 		all, err := joplin.CollectAll(ctx, func(ctx context.Context, page int) (joplin.Page[joplin.Note], error) {
 			return c.ListTrashedNotes(ctx, joplin.ListOptions{Page: page, Limit: 100})

@@ -39,11 +39,45 @@ func runCLI(ctx context.Context, c *joplin.Client, maxResource int64, sub string
 	switch sub {
 	case "tools":
 		return cliListTools(ctx, clientSession)
+	case "describe":
+		return cliDescribe(ctx, clientSession, args)
 	case "call":
 		return cliCall(ctx, clientSession, args)
 	default:
-		return fmt.Errorf("unknown subcommand %q (try 'tools' or 'call')", sub)
+		return fmt.Errorf("unknown subcommand %q (try 'tools', 'describe', or 'call')", sub)
 	}
+}
+
+// cliDescribe dumps the full tools/list response — the same JSON schemas the
+// MCP client serialises into the LLM's system prompt. Useful for verifying
+// that descriptions / argument schemas read well to a model.
+//
+//	joplin-mcp describe              # all tools
+//	joplin-mcp describe list_notes   # one tool
+func cliDescribe(ctx context.Context, cs *mcp.ClientSession, args []string) error {
+	res, err := cs.ListTools(ctx, &mcp.ListToolsParams{})
+	if err != nil {
+		return err
+	}
+	filter := ""
+	if len(args) > 0 {
+		filter = args[0]
+	}
+	matched := make([]*mcp.Tool, 0, len(res.Tools))
+	for _, t := range res.Tools {
+		if filter == "" || t.Name == filter {
+			matched = append(matched, t)
+		}
+	}
+	if filter != "" && len(matched) == 0 {
+		return fmt.Errorf("no tool named %q (try 'joplin-mcp tools' to list)", filter)
+	}
+	b, err := json.MarshalIndent(matched, "", "  ")
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(b))
+	return nil
 }
 
 // readJSONSource resolves a --json value into a JSON string:

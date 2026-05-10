@@ -90,6 +90,11 @@ type NoteContextOut struct {
 	Resources []ResourceOut `json:"resources"`
 }
 
+// NoArgs is the input type for tools that take no parameters. The MCP SDK
+// can't synthesise a JSON schema from a literal struct{}, so we use this
+// empty-but-named struct instead.
+type NoArgs struct{}
+
 // Bytes are base64-encoded so they can travel through MCP's JSON transport.
 type DownloadResourceOut struct {
 	Base64Data  string `json:"base64_data"`
