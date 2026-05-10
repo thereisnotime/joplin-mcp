@@ -90,6 +90,7 @@ func extractEnvFileFlag(args []string) (string, []string, error) {
 // Shell-set env vars always win over file values regardless of source.
 func loadEnvWithFallbacks(explicit string) error {
 	if explicit != "" {
+		// #nosec G304,G703 -- the path is supplied by the operator via --env-file; that's the documented use
 		if _, err := os.Stat(explicit); err != nil {
 			return fmt.Errorf("--env-file %q: %w", explicit, err)
 		}

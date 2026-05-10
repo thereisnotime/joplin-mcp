@@ -16,7 +16,8 @@ import (
 // ignored, lines are KEY=VALUE, surrounding single or double quotes on the
 // value are stripped. No multiline values, no shell expansion, no exports.
 func loadDotEnv(path string) error {
-	f, err := os.Open(path) // #nosec G304 -- path is fixed to ".env" in main()
+	// #nosec G304,G703 -- path is operator-supplied via --env-file or the documented XDG fallback chain
+	f, err := os.Open(path)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			return nil
