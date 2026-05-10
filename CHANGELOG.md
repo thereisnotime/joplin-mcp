@@ -9,6 +9,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+[Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.6.0...HEAD
+
+---
+
+## [0.6.0] - 2026-05-10
+
 ### Added
 
 - **`health` tool** — quick connectivity check that pings Joplin, reports the
@@ -40,7 +46,13 @@ project uses [Semantic Versioning](https://semver.org/).
   Go MCP SDK can't synthesise a JSON Schema for an unnamed empty struct
   and panics on registration.
 
-[Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.5.0...HEAD
+### Fixed
+
+- gosec G703 (path traversal via taint analysis) on the new
+  `--env-file` and XDG fallback paths. Both paths are intentionally
+  operator-supplied — that's the documented use of the feature.
+
+[0.6.0]: https://github.com/thereisnotime/joplin-mcp/releases/tag/v0.6.0
 
 ---
 
