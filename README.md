@@ -184,7 +184,7 @@ Open Cline's MCP settings (Command Palette → "Cline: MCP Servers") and add:
 
 ## Tools
 
-31 tools across seven groups.
+41 tools across ten groups.
 
 ### Notes
 
@@ -251,6 +251,36 @@ Open Cline's MCP settings (Command Palette → "Cline: MCP Servers") and add:
 |---|---|
 | `list_note_revisions` | List the revision history for a specific note. |
 | `get_revision` | Get a single revision by ID. |
+
+### Links
+
+| Tool | Description |
+|---|---|
+| `list_outbound_links` | List Joplin item IDs referenced from a note's body via `:/<id>` markdown links and image embeds. Set `resolve_titles=true` to also fetch each target's title. |
+| `list_backlinks` | List notes whose body references the given note. Joplin doesn't expose backlinks natively; this is a search across all notes. |
+
+### Attach
+
+| Tool | Description |
+|---|---|
+| `attach_resource_to_note` | Upload a file as a Joplin resource AND insert a properly-formatted markdown reference into the note body in one call. Image MIME types use `![]()`; others use `[]()`. |
+
+### Bulk
+
+| Tool | Description |
+|---|---|
+| `bulk_tag_notes` | Attach the same tag to many notes in parallel. |
+| `bulk_untag_notes` | Detach the same tag from many notes in parallel. |
+| `bulk_move_notes` | Move many notes into the same folder in parallel. |
+| `bulk_delete_notes` | Delete many notes (default trash, set `permanent=true` to bypass). |
+
+### Trash
+
+| Tool | Description |
+|---|---|
+| `list_trash` | List notes currently in the trash (`deleted_time` is set). |
+| `restore_note_from_trash` | Move a trashed note back to its folder by clearing `deleted_time`. |
+| `empty_trash` | Permanently delete every note currently in the trash. Irreversible. |
 
 ## CLI mode
 

@@ -473,3 +473,112 @@ func TestE2E_BadTokenRejected(t *testing.T) {
 		t.Errorf("expected 401/403, got %d", apiErr.StatusCode)
 	}
 }
+
+func TestE2E_BacklinksAndOutbound(t *testing.T) {
+	c, ctx := setup(t)
+
+	folder, err := c.CreateFolder(ctx, joplin.CreateFolderInput{Title: name("links-folder")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = c.DeleteFolder(context.Background(), folder.ID, true) })
+
+	target, err := c.CreateNote(ctx, joplin.CreateNoteInput{
+		Title:    name("link-target"),
+		Body:     "I am the target.",
+		ParentID: folder.ID,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = c.DeleteNote(context.Background(), target.ID, true) })
+
+	source, err := c.CreateNote(ctx, joplin.CreateNoteInput{
+		Title:    name("link-source"),
+		Body:     "see [target](:/" + target.ID + ") for details",
+		ParentID: folder.ID,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = c.DeleteNote(context.Background(), source.ID, true) })
+
+	got := joplin.ExtractLinkedIDs(source.Body)
+	if len(got) != 1 || got[0] != target.ID {
+		t.Errorf("ExtractLinkedIDs from source = %v, want [%s]", got, target.ID)
+	}
+
+	// Backlink search relies on Joplin's full-text index; poll briefly.
+	deadline := time.Now().Add(15 * time.Second)
+	var hits joplin.Page[joplin.Note]
+	for time.Now().Before(deadline) {
+		hits, err = c.SearchNotes(ctx, `":/`+target.ID+`"`, joplin.ListOptions{Limit: 10})
+		if err == nil {
+			found := false
+			for _, n := range hits.Items {
+				if n.ID == source.ID {
+					found = true
+					break
+				}
+			}
+			if found {
+				return
+			}
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	t.Errorf("backlink search did not surface the source note within 15s")
+}
+
+func TestE2E_TrashAndRestore(t *testing.T) {
+	c, ctx := setup(t)
+
+	folder, err := c.CreateFolder(ctx, joplin.CreateFolderInput{Title: name("trash-folder")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = c.DeleteFolder(context.Background(), folder.ID, true) })
+
+	n, err := c.CreateNote(ctx, joplin.CreateNoteInput{
+		Title:    name("trash-victim"),
+		Body:     "byebye",
+		ParentID: folder.ID,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = c.DeleteNote(context.Background(), n.ID, true) })
+
+	if err := c.DeleteNote(ctx, n.ID, false); err != nil {
+		t.Fatalf("trash: %v", err)
+	}
+
+	page, err := c.ListTrashedNotes(ctx, joplin.ListOptions{Limit: 100})
+	if err != nil {
+		t.Fatalf("list trash: %v", err)
+	}
+	found := false
+	for _, x := range page.Items {
+		if x.ID == n.ID {
+			found = true
+			if x.DeletedTime == 0 {
+				t.Error("trashed note returned with deleted_time=0")
+			}
+			break
+		}
+	}
+	if !found {
+		t.Error("trashed note not present in list_trashed")
+	}
+
+	if _, err := c.RestoreNote(ctx, n.ID); err != nil {
+		t.Fatalf("restore: %v", err)
+	}
+	got, err := c.GetNote(ctx, n.ID)
+	if err != nil {
+		t.Fatalf("get after restore: %v", err)
+	}
+	if got.DeletedTime != 0 {
+		t.Errorf("after restore, deleted_time = %d, want 0", got.DeletedTime)
+	}
+}

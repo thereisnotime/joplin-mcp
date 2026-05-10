@@ -26,7 +26,11 @@ func New(c *joplin.Client, opts Options) *mcp.Server {
 	registerTagTools(srv, c)
 	registerSearchTools(srv, c)
 	registerResourceTools(srv, c, opts.MaxResourceBytes)
+	registerAttachTools(srv, c, opts.MaxResourceBytes)
 	registerEventTools(srv, c)
 	registerRevisionTools(srv, c)
+	registerLinkTools(srv, c)
+	registerBulkTools(srv, c)
+	registerTrashTools(srv, c)
 	return srv
 }

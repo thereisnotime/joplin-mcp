@@ -9,7 +9,61 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/thereisnotime/joplin-mcp/compare/v0.5.0...HEAD
+
+---
+
+## [0.5.0] - 2026-05-10
+
+### Added
+
+Ten new tools across four new groups, bringing the total to 41:
+
+**Links** (knowledge-base navigation; Joplin's native API has no backlinks):
+
+- `list_outbound_links` — Joplin item IDs referenced from a note's body via
+  `:/<id>` markdown links and image embeds. Optional `resolve_titles=true`
+  to also fetch each target's title.
+- `list_backlinks` — notes whose body references the given note. Implemented
+  as a quoted-substring search; deduped to exclude self-references.
+
+**Attach** (one-call replacement for the upload-then-update-body workflow):
+
+- `attach_resource_to_note` — uploads a file AND inserts a canonical
+  markdown reference into the note body atomically. Image MIME types get
+  `![]()` (renders inline); others get `[]()` (download link). Returns the
+  exact markdown string inserted so the LLM can re-use it elsewhere.
+  Subject to the same `JOPLIN_MAX_RESOURCE_BYTES` cap as the underlying
+  `upload_resource` tool.
+
+**Bulk** (cuts round-trips for migration / cleanup workflows):
+
+- `bulk_tag_notes` / `bulk_untag_notes` — attach or detach one tag from
+  many notes in parallel.
+- `bulk_move_notes` — set the same `parent_id` on many notes.
+- `bulk_delete_notes` — trash or permanently delete many notes.
+
+  All bulk tools fan out at most 4 in-flight requests at a time and return
+  per-id `succeeded` / `failed` so the LLM can see partial progress.
+
+**Trash** (lifecycle completion; previously the LLM could `delete_note`
+but not see, restore, or purge trashed items):
+
+- `list_trash` — paginated list of notes whose `deleted_time` is set.
+- `restore_note_from_trash` — clears `deleted_time` so the note returns
+  to its original folder.
+- `empty_trash` — permanently deletes every trashed note.
+
+### Internal
+
+- `joplin.ExtractLinkedIDs(body)` — regex helper that returns deduped
+  Joplin IDs referenced from a markdown body. Used by
+  `list_outbound_links`; exported because it's also useful in tests.
+- `joplin.ListTrashedNotes` and `joplin.RestoreNote` wrap the raw
+  `include_deleted=1` listing and the `PUT deleted_time=0` restore
+  semantics so the tool layer stays free of trash-specific quirks.
+
+[0.5.0]: https://github.com/thereisnotime/joplin-mcp/releases/tag/v0.5.0
 
 ---
 
