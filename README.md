@@ -75,6 +75,28 @@ joplin-mcp reads its configuration from environment variables.
 To get a token: open Joplin Desktop → **Tools → Options → Web Clipper**, enable the
 Web Clipper Service, copy the API token shown.
 
+### Where to put the token
+
+Three options, in priority order (each one wins over the next):
+
+1. **Shell-set env vars** — always wins. Useful for one-off CLI use.
+2. **`--env-file <path>`** — pass on the command line. Best for MCP clients
+   so the token never touches `mcp.json`.
+3. **A `.env` file** in one of these locations (first one found wins):
+   - `./.env` in the current working directory
+   - `$XDG_CONFIG_HOME/joplin-mcp/.env`
+   - `~/.config/joplin-mcp/.env`
+
+Example `.env` (chmod 600 it):
+
+```sh
+JOPLIN_TOKEN=your-token-here
+# JOPLIN_BASE_URL=http://localhost:41184
+# JOPLIN_MAX_RESOURCE_BYTES=52428800
+```
+
+See [.env.example](.env.example) for the full template.
+
 ### Claude Desktop
 
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or
@@ -83,6 +105,22 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 `~/go/bin/joplin-mcp` on Linux/macOS and `%USERPROFILE%\go\bin\joplin-mcp.exe`
 on Windows. Claude Desktop does not expand `~` or `$HOME`, so use the absolute
 path.
+
+**Recommended: keep the token out of this file.** Point `joplin-mcp` at a
+`.env` you maintain separately:
+
+```json
+{
+  "mcpServers": {
+    "joplin": {
+      "command": "/home/YOU/go/bin/joplin-mcp",
+      "args": ["--env-file", "/home/YOU/.config/joplin-mcp/.env"]
+    }
+  }
+}
+```
+
+Or, if you don't mind the token being in `mcp.json`:
 
 ```json
 {
