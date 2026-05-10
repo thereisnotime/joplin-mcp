@@ -175,16 +175,19 @@ type UpdateNoteInput struct {
 	TodoDue       *int64  `json:"todo_due,omitempty"`
 }
 
-// CreateFolderInput is the writable subset for creating a folder.
+// CreateFolderInput is the writable subset for creating a folder. Icon is a
+// raw JSON string in Joplin's internal format — see EmojiIcon for a helper.
 type CreateFolderInput struct {
 	Title    string `json:"title,omitempty"`
 	ParentID string `json:"parent_id,omitempty"`
+	Icon     string `json:"icon,omitempty"`
 }
 
 // UpdateFolderInput is the writable subset for updating a folder.
 type UpdateFolderInput struct {
 	Title    *string `json:"title,omitempty"`
 	ParentID *string `json:"parent_id,omitempty"`
+	Icon     *string `json:"icon,omitempty"`
 }
 
 // CreateTagInput is the writable subset for creating a tag.

@@ -2,9 +2,24 @@ package joplin
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/url"
 )
+
+// EmojiIcon serialises an emoji into Joplin's folder-icon JSON format
+// ({"emoji":"…","type":1}). Pass the result as the Icon field on
+// CreateFolderInput / UpdateFolderInput.
+func EmojiIcon(emoji string) string {
+	if emoji == "" {
+		return ""
+	}
+	b, _ := json.Marshal(struct {
+		Emoji string `json:"emoji"`
+		Type  int    `json:"type"`
+	}{Emoji: emoji, Type: 1})
+	return string(b)
+}
 
 // Joplin's default field set on /folders is minimal; ask explicitly for what
 // we need so encryption_applied / master_key_id are always populated.

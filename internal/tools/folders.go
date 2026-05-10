@@ -20,12 +20,19 @@ type GetFolderArgs struct {
 type CreateFolderArgs struct {
 	Title    string `json:"title"`
 	ParentID string `json:"parent_id,omitempty" jsonschema:"optional parent folder ID for nested folders"`
+	Emoji    string `json:"emoji,omitempty" jsonschema:"optional folder icon emoji (e.g. 🚀); shown in the Joplin sidebar"`
 }
 
 type UpdateFolderArgs struct {
 	FolderID string  `json:"folder_id"`
 	Title    *string `json:"title,omitempty"`
 	ParentID *string `json:"parent_id,omitempty"`
+	Emoji    *string `json:"emoji,omitempty" jsonschema:"set or change the folder's icon emoji; pass empty string to clear it"`
+}
+
+type SetFolderIconArgs struct {
+	FolderID string `json:"folder_id"`
+	Emoji    string `json:"emoji" jsonschema:"the emoji to use as the folder icon; pass empty string to clear"`
 }
 
 type DeleteFolderArgs struct {
@@ -64,9 +71,13 @@ func registerFolderTools(srv *mcp.Server, c *joplin.Client) {
 
 	mcp.AddTool(srv, &mcp.Tool{
 		Name:        "create_folder",
-		Description: "Create a folder. Set parent_id for nested folders.",
+		Description: "Create a folder. Set parent_id for nested folders. Optional emoji becomes the folder's sidebar icon.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, args CreateFolderArgs) (*mcp.CallToolResult, FolderOut, error) {
-		f, err := c.CreateFolder(ctx, joplin.CreateFolderInput{Title: args.Title, ParentID: args.ParentID})
+		in := joplin.CreateFolderInput{Title: args.Title, ParentID: args.ParentID}
+		if args.Emoji != "" {
+			in.Icon = joplin.EmojiIcon(args.Emoji)
+		}
+		f, err := c.CreateFolder(ctx, in)
 		if err != nil {
 			return nil, FolderOut{}, err
 		}
@@ -75,9 +86,26 @@ func registerFolderTools(srv *mcp.Server, c *joplin.Client) {
 
 	mcp.AddTool(srv, &mcp.Tool{
 		Name:        "update_folder",
-		Description: "Partially update a folder.",
+		Description: "Partially update a folder. Pass emoji='' to clear the icon.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, args UpdateFolderArgs) (*mcp.CallToolResult, FolderOut, error) {
-		f, err := c.UpdateFolder(ctx, args.FolderID, joplin.UpdateFolderInput{Title: args.Title, ParentID: args.ParentID})
+		in := joplin.UpdateFolderInput{Title: args.Title, ParentID: args.ParentID}
+		if args.Emoji != nil {
+			icon := joplin.EmojiIcon(*args.Emoji)
+			in.Icon = &icon
+		}
+		f, err := c.UpdateFolder(ctx, args.FolderID, in)
+		if err != nil {
+			return nil, FolderOut{}, err
+		}
+		return nil, folderOut(f), nil
+	})
+
+	mcp.AddTool(srv, &mcp.Tool{
+		Name:        "set_folder_icon",
+		Description: "Convenience tool: set or clear a folder's sidebar icon emoji. Pass empty string to clear.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, args SetFolderIconArgs) (*mcp.CallToolResult, FolderOut, error) {
+		icon := joplin.EmojiIcon(args.Emoji)
+		f, err := c.UpdateFolder(ctx, args.FolderID, joplin.UpdateFolderInput{Icon: &icon})
 		if err != nil {
 			return nil, FolderOut{}, err
 		}

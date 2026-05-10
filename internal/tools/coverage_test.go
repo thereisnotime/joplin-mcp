@@ -83,8 +83,10 @@ func TestAllRemainingTools_Smoke(t *testing.T) {
 	}{
 		{"list_folders", nil},
 		{"get_folder", map[string]any{"folder_id": "f1"}},
-		{"create_folder", map[string]any{"title": "new"}},
+		{"create_folder", map[string]any{"title": "new", "emoji": "📁"}},
+		{"set_folder_icon", map[string]any{"folder_id": "f1", "emoji": "🚀"}},
 		{"update_folder", map[string]any{"folder_id": "f1", "title": "renamed"}},
+		{"update_folder", map[string]any{"folder_id": "f1", "emoji": "🎯"}},
 		{"delete_folder", map[string]any{"folder_id": "f1"}},
 		{"list_notes_in_folder", map[string]any{"folder_id": "f1"}},
 		{"list_tags", nil},
