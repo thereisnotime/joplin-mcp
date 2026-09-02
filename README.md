@@ -20,11 +20,10 @@ the local Joplin device are surfaced as such, never silently returned as empty b
 
 ## How it works
 
-```
-┌─────────────────┐    stdio MCP    ┌──────────────┐    HTTP    ┌──────────────────┐
-│  MCP client     │ ───────────────▶│  joplin-mcp  │ ──────────▶│  Joplin Desktop  │
-│ (Claude, etc.)  │                 │              │  :41184    │  Web Clipper     │
-└─────────────────┘                 └──────────────┘            └──────────────────┘
+```mermaid
+flowchart LR
+    A["MCP client\n(Claude, etc.)"] -- "stdio MCP" --> B["joplin-mcp"]
+    B -- "HTTP :41184" --> C["Joplin Desktop\nWeb Clipper"]
 ```
 
 joplin-mcp talks only to the local Joplin Desktop API. It does not touch your sync
